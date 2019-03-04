@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "moduleResolution": "node",
+    "allowJs": false,
+    "module": "commonjs",
+    "pretty": true,
+    "noUnusedLocals": true,
+    "resolveJsonModule": true,
+    "lib": [
+      "dom",
+      "es2017"
+    ],
+    "plugins": [
+      {
+        "name": "typescript-tslint-plugin",
+        "alwaysShowRuleFailuresAsWarnings": false,
+        "ignoreDefinitionFiles": true,
+        "suppressWhileTypeErrorsPresent": false,
+        "mockTypeScriptVersion": false,
+        "configFile": "tslint.yaml"
+      }
+    ]
+  },
+  "include": [
+    "src/**/*.ts",
+  ]
+}
