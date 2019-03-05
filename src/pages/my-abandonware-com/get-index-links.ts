@@ -1,4 +1,5 @@
 import { Browser } from 'puppeteer';
+import { getLogger } from '../../utils/logger';
 
 /**
  * Get links of game pages from the index
@@ -8,7 +9,9 @@ import { Browser } from 'puppeteer';
  */
 export async function getIndexLinks(browser: Browser, baseUrl: string, pageN: number): Promise<string[]> {
   const url = `${baseUrl}${pageN > 1 ? `page/${pageN}/` : ''}`;
-  console.log(`Retrieving page ${url}`);
+
+  const logger = getLogger();
+  logger.log('info', `getIndexLinks(${url})`);
 
   const page = await browser.newPage();
   await page.goto(url);
@@ -22,6 +25,9 @@ export async function getIndexLinks(browser: Browser, baseUrl: string, pageN: nu
 }
 
 export async function getNumberOfIndexPages(browser: Browser, baseUrl: string): Promise<number> {
+  const logger = getLogger();
+  logger.log('info', `getNumberOfIndexPages(${baseUrl})`);
+
   const page = await browser.newPage();
   let nPages: number;
 
@@ -30,7 +36,7 @@ export async function getNumberOfIndexPages(browser: Browser, baseUrl: string): 
     nPages = await page.evaluate(() => {
       const links = document.querySelectorAll('.pagination a');
       return Number((links[links.length - 1] as HTMLAnchorElement).innerText);
-    })
+    });
   } catch (e) {}
 
   await page.close();

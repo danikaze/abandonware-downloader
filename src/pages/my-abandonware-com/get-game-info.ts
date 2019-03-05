@@ -2,11 +2,15 @@ import { Browser, Page } from 'puppeteer';
 import { GameInfo, Dict } from '../../interfaces';
 import { asyncParallel } from '../../utils/async-parallel';
 import { toCamelCase } from '../../utils/to-camel-case';
+import { getLogger } from '../../utils/logger';
 
 async function getName(page: Page, info: GameInfo): Promise<void> {
   try {
     info.name = await page.$eval('.box h2', (elem: HTMLHeadElement) => elem.innerText);
-  } catch (e) {}
+  } catch (e) {
+    const logger = getLogger();
+    logger.log('warning', `getName not available for ${info.pageUrl}`);
+  }
 }
 
 async function getMeta(page: Page, info: GameInfo): Promise<void> {
@@ -19,7 +23,10 @@ async function getMeta(page: Page, info: GameInfo): Promise<void> {
       const metaName = toCamelCase(meta[0]);
       info.meta[metaName] = meta[1];
     });
-  } catch (e) {}
+  } catch (e) {
+    const logger = getLogger();
+    logger.log('warning', `getMeta not available for ${info.pageUrl}`);
+  }
 }
 
 async function getScore(page: Page, info: GameInfo): Promise<void> {
@@ -33,7 +40,10 @@ async function getScore(page: Page, info: GameInfo): Promise<void> {
     );
     info.score = Number(scoreInfo[0]);
     info.votes = Number(scoreInfo[1]);
-  } catch (e) {}
+  } catch (e) {
+    const logger = getLogger();
+    logger.log('warning', `getScore not available for ${info.pageUrl}`);
+  }
 }
 
 async function getPlayOnlineLink(page: Page, info: GameInfo): Promise<void> {
@@ -51,7 +61,10 @@ async function getPlatforms(page: Page, info: GameInfo): Promise<Dict<string>> {
       a.innerText,
     ]));
     data.forEach((item) => { platforms[item[0]] = item[1]; });
-  } catch (e) {}
+  } catch (e) {
+    const logger = getLogger();
+    logger.log('warning', `getPlatforms not available for ${info.pageUrl}`);
+  }
 
   return platforms;
 }
@@ -65,6 +78,8 @@ async function getScreenshots(page: Page, info: GameInfo): Promise<void> {
       );
       return screenshots;
     } catch (e) {
+      const logger = getLogger();
+      logger.log('warning', `getPlatformScreenshots(${platformId}) not available for ${info.pageUrl}`);
       return [];
     }
   }
@@ -81,10 +96,16 @@ async function getScreenshots(page: Page, info: GameInfo): Promise<void> {
 async function getDescription(page: Page, info: GameInfo): Promise<void> {
   try {
     info.description = await page.$eval('.gameDescription.dscr', (elem: HTMLDivElement) => elem.innerHTML);
-  } catch (e) {}
+  } catch (e) {
+    const logger = getLogger();
+    logger.log('warning', `getDescription not available for ${info.pageUrl}`);
+  }
 }
 
 export async function getGameInfo(browser: Browser, url: string): Promise<GameInfo> {
+  const logger = getLogger();
+  logger.log('info', `getGameInfo(${url})`);
+
   const page = await browser.newPage();
   await page.goto(url);
 

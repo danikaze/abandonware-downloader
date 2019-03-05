@@ -1,0 +1,12 @@
+{
+  "outputDir": "[app]/downloads",
+  "gameDownloadsPath": "[app]/../downloads/[platform]/[name]",
+  "gameScreenshotsPath": "[app]/../downloads/[platform]/[name]/screenshots",
+  "gameInfoPath": "[app]/../downloads/[platform]/[name]/info.json",
+  "internalDataDir": "[app]/.abandonware-dl",
+  "debugCode": false,
+  "log": [{
+    "level": "debug",
+    "colors": true
+  }]
+}

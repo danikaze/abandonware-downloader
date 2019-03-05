@@ -17,8 +17,8 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch --sourceMap",
+    "start": "node app/index.js --config src/settings.json",
     "lint": "tslint -p tsconfig.json -c tslint.yaml",
-    "run-ts": "ts-node src/index.ts",
     "clean": "rimraf app"
   },
   "devDependencies": {
@@ -33,6 +33,7 @@
     "typescript": "^3.3.3333"
   },
   "dependencies": {
-    "puppeteer": "^1.12.2"
+    "puppeteer": "^1.12.2",
+    "winston": "^3.2.1"
   }
 }
