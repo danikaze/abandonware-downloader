@@ -1,5 +1,7 @@
 {
   "compilerOptions": {
+    "outDir": "app",
+    "target": "es2017",
     "moduleResolution": "node",
     "allowJs": false,
     "module": "commonjs",

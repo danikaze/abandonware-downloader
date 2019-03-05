@@ -15,11 +15,15 @@
     "npm": "5.6.x"
   },
   "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch --sourceMap",
+    "lint": "tslint -p tsconfig.json -c tslint.yaml",
     "run-ts": "ts-node src/index.ts",
-    "lint": "tslint -p tsconfig.json -c tslint.yaml"
+    "clean": "rimraf app"
   },
   "devDependencies": {
     "@types/puppeteer": "^1.12.1",
+    "rimraf": "^2.6.3",
     "ts-node": "^8.0.2",
     "tslint": "^5.13.1",
     "tslint-consistent-codestyle": "^1.15.1",

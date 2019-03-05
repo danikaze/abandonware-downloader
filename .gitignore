@@ -2,17 +2,14 @@
 # Project Files
 # =========================
 .DS_Store
-.vscode/*
 *.log
 *.SUBLIME-PROJECT
 *.SUBLIME-WORKSPACE
-build
-buildInfo
-backend/public
-backend/data
+app
 coverage
 node_modules
 temp
+downloads
 *.psd
 
 # =========================

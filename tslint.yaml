@@ -216,11 +216,6 @@ rules:
     # https://github.com/ajafff/tslint-consistent-codestyle/blob/master/docs/object-shorthand-properties-first.md
     object-shorthand-properties-first: true
 
-    # https://github.com/ajafff/tslint-consistent-codestyle/blob/master/docs/early-exit.md
-    early-exit:
-        - true
-        - max-length: 4
-
     # https://github.com/ajafff/tslint-consistent-codestyle/blob/master/docs/no-collapsible-if.md
     no-collapsible-if: true
 
