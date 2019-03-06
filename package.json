@@ -22,7 +22,9 @@
     "clean": "rimraf app"
   },
   "devDependencies": {
+    "@types/mkdirp": "^0.5.2",
     "@types/puppeteer": "^1.12.1",
+    "@types/request": "^2.48.1",
     "rimraf": "^2.6.3",
     "ts-node": "^8.0.2",
     "tslint": "^5.13.1",
@@ -33,7 +35,9 @@
     "typescript": "^3.3.3333"
   },
   "dependencies": {
+    "mkdirp": "^0.5.1",
     "puppeteer": "^1.12.2",
+    "request": "^2.88.0",
     "winston": "^3.2.1"
   }
 }
