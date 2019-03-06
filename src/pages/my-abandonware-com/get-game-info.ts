@@ -73,8 +73,8 @@ async function getScreenshots(page: Page, info: GameInfo): Promise<void> {
   async function getPlatformScreenshots(platformId): Promise<string[]> {
     try {
       const screenshots = await page.$$eval(
-        `.items.screens[data-platform="${platformId}"] .thumb img`,
-        (imgs: HTMLImageElement[]) => imgs.map((img) => img.src),
+        `.items.screens[data-platform="${platformId}"] .thumb a`,
+        (imgs: HTMLAnchorElement[]) => imgs.map((img) => img.href),
       );
       return screenshots;
     } catch (e) {
@@ -247,7 +247,7 @@ export async function getGameInfo(browser: Browser, url: string): Promise<GameIn
 
   const info: GameInfo = {
     pageUrl: url,
-    updated: new Date().getUTCDate(),
+    updated: new Date().getTime(),
   };
 
   await Promise.all([
