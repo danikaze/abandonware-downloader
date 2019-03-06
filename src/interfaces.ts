@@ -4,8 +4,9 @@ export type Dict<T> = { [key: string]: T };
 
 export interface Link {
   url: string;
-  info: string;
-  languages: string;
+  platform?: string;
+  languages?: string[];
+  info?: string;
   meta?: Dict<string>;
 }
 
