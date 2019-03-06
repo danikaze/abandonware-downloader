@@ -7,9 +7,7 @@ import { getLogger } from '../../utils/logger';
  * @param browser Browser instance to run the query
  * @param pageN Number of the page (as the page uses)
  */
-export async function getIndexLinks(browser: Browser, baseUrl: string, pageN: number): Promise<string[]> {
-  const url = `${baseUrl}${pageN > 1 ? `page/${pageN}/` : ''}`;
-
+export async function getIndexLinks(browser: Browser, url: string): Promise<string[]> {
   const logger = getLogger();
   logger.log('info', `getIndexLinks(${url})`);
 

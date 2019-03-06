@@ -49,6 +49,20 @@ export const availableYears = (() => {
   return years;
 })();
 
+const urlRegEx = /^(https\:\/\/www\.myabandonware\.com\/browse\/([^/]+)\/([^/]+)\/)(page\/(\d+)\/)?$/;
+
+function getUrlBase(url: string): string {
+  const match = urlRegEx.exec(url);
+
+  return match && match[1];
+}
+
+function getUrlPage(url: string): number {
+  const match = urlRegEx.exec(url);
+
+  return match && Number(match[4]) || 1;
+}
+
 export function getIndexPageByGenre(genre: GameGenres): string {
   return `https://www.myabandonware.com/browse/genre/${GameGenres[genre].toLowerCase()}-${genre}/`;
 }
@@ -60,7 +74,7 @@ export function getIndexPageByName(letter?: string): string {
     return url;
   }
 
-  return `${url}${letter.toUpperCase()}`;
+  return `${url}${letter.toUpperCase()}/`;
 }
 
 export function getIndexPageByYear(year: number): string {
@@ -70,3 +84,16 @@ export function getIndexPageByYear(year: number): string {
 export function getIndexPageByPlatform(platform: Platforms): string {
   return `https://www.myabandonware.com/browse/platform/${platform}/`;
 }
+
+export function getIndexPageNumber(url: string, pageNumber: number): string {
+  const baseUrl = getUrlBase(url);
+
+  return `${baseUrl}${pageNumber > 1 ? `page/${pageNumber}/` : ''}`;
+}
+
+export function getNextPage(url: string): string {
+  const pageNumber = getUrlPage(url);
+
+  return getIndexPageNumber(url, pageNumber + 1);
+}
+
