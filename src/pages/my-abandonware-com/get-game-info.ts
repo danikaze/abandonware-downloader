@@ -6,7 +6,7 @@ import { toCamelCase } from '../../utils/to-camel-case';
 
 async function getName(page: Page, info: GameInfo): Promise<void> {
   try {
-    info.name = await page.$eval('.box h2', (elem: HTMLHeadElement) => elem.innerText);
+    info.name = await page.$eval('.box h2', (elem: HTMLHeadElement) => elem.innerHTML);
   } catch (e) {
     const logger = getLogger();
     logger.log('warn', `getName not available for ${info.pageUrl}`);
@@ -161,7 +161,7 @@ async function getDownloadLinks(page: Page, info: GameInfo): Promise<void> {
           const spans = Array.from(child.querySelectorAll('span')) as HTMLSpanElement[];
           spans.forEach((span) => span.parentElement.removeChild(span));
 
-          link.info = child.innerText || undefined;
+          link.info = child.innerHTML || undefined;
           links.push({ ...link });
         }
         return true;
