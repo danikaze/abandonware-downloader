@@ -25,10 +25,17 @@ async function run() {
 
   const indexUrl = getIndexPageByYear(availableYears[1]);
   const nPages = await getNumberOfIndexPages(browser, indexUrl);
-  const links = await getIndexLinks(browser, indexUrl, nPages);
+  const url = getIndexPageNumber(indexUrl, nPages);
+  const games = await getIndexLinks(browser, url);
 
-  await asyncParallel(links, async (link) => {
-    await getGameInfo(browser, link);
+  console.log('Discovered games:');
+  games.forEach((game) => {
+    console.log(` * ${game.name} (${game.meta.year}) [${game.meta.platform}]`);
+  });
+
+  await asyncParallel([games[0]], async (game) => {
+    const info = await getGameInfo(browser, game.pageUrl);
+    downloadGame(info);
   });
 
   await browser.close();
