@@ -1,4 +1,4 @@
-import { join } from 'path';
+import { join, resolve } from 'path';
 import { GameInfo } from '../interfaces';
 import { getSettings } from './settings';
 
@@ -15,8 +15,10 @@ export function pathBuilder(path: Path, info: Partial<GameInfo> = {}): string {
     publisher: info.meta && info.meta.publisher || '',
   };
 
-  return Object.keys(values).reduce((str, key) => {
+  const link = Object.keys(values).reduce((str, key) => {
     const regExp = new RegExp(`(\\[${key}\\])`, 'gi');
     return str.replace(regExp, values[key]);
   }, settings[`${path}Path`]);
+
+  return resolve(link);
 }
