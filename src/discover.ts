@@ -16,7 +16,7 @@ export interface DiscoverOptions {
   /** If specified, it will use this options when `browser` is not specified */
   browserLaunchOptions?: LaunchOptions;
   /** Function called when a game info is retrieved */
-  onDiscover?(info: DiscoverInfo): void;
+  onDiscover?(info: DiscoverInfo, requestStop: () => void): void;
 }
 
 const defaultOptions: Partial<DiscoverOptions> = {
@@ -36,6 +36,12 @@ export interface DiscoverInfo {
 export async function discover(options: DiscoverOptions): Promise<DiscoverInfo> {
   return new Promise(async (resolve) => {
     const opt: DiscoverOptions = { ...defaultOptions, ...options };
+    let stopRequested = false;
+
+    function requestStop() {
+      stopRequested = true;
+    }
+
     const index = opt.index;
 
     const logger = getLogger();
@@ -66,11 +72,21 @@ export async function discover(options: DiscoverOptions): Promise<DiscoverInfo> 
       while (info.currentPage <= info.availablePages) {
         info.gameList.push.apply(info.gameList, await index.getLinks(browser));
         if (opt.onDiscover) {
-          opt.onDiscover({ ...info });
+          opt.onDiscover({ ...info }, requestStop);
         }
+
+        if (stopRequested) {
+          break;
+        }
+
         index.nextPage();
         info.currentPage = index.getPage();
       }
+
+      if (stopRequested) {
+        break;
+      }
+
       index.nextCategory();
       info.availablePages = await index.getNumberOfPages(browser);
       info.currentPage = index.getPage();
