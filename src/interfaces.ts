@@ -12,7 +12,7 @@ export interface Link {
 
 export interface GameInfo {
   pageUrl: string;
-  updated: number;
+  updated?: number;
   name?: string;
   meta?: Dict<string>;
   score?: number;

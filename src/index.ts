@@ -1,10 +1,9 @@
+// tslint:disable: no-console
 import { launch } from 'puppeteer';
-import { asyncParallel } from './utils/async-parallel';
-import { getIndexLinks, getNumberOfIndexPages } from './pages/my-abandonware-com/get-index-links';
-import { getGameInfo } from './pages/my-abandonware-com/get-game-info';
-import { getIndexPageByYear, availableYears } from './pages/my-abandonware-com/index-page-urls';
 import { loadSettings, getSettingsPath, getSettings } from './utils/settings';
 import { getLogger, initLogger } from './utils/logger';
+import { discover, DiscoverInfo } from './discover';
+import { IndexPlatform } from './pages/my-abandonware-com/index-strategies';
 
 function initApp(settingsFile: string) {
   const settings = loadSettings(settingsFile);
@@ -23,12 +22,27 @@ async function run() {
     devtools: settings.debugCode,
   });
 
-  const indexUrl = getIndexPageByYear(availableYears[1]);
-  const nPages = await getNumberOfIndexPages(browser, indexUrl);
-  const links = await getIndexLinks(browser, indexUrl, nPages);
+  let shownGames = 0;
+  let iterations = 3;
 
-  await asyncParallel(links, async (link) => {
-    await getGameInfo(browser, link);
+  function onDiscoverCallback(info: DiscoverInfo, requestStop: () => void) {
+    console.log(`Discovered page ${info.currentPage}/${info.availablePages} of ${info.currentCategory}`);
+    while (shownGames < info.gameList.length) {
+      const game = info.gameList[shownGames++];
+      console.log(` * ${game.name} (${game.meta.year}) [${game.meta.platform}]`);
+    }
+
+    iterations--;
+    if (iterations === 0) {
+      requestStop();
+    }
+  }
+
+  // tslint:disable-next-line:no-magic-numbers
+  await discover({
+    browser,
+    index: new IndexPlatform('dos'),
+    onDiscover: onDiscoverCallback,
   });
 
   await browser.close();

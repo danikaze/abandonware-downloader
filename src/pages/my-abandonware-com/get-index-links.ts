@@ -1,25 +1,43 @@
 import { Browser } from 'puppeteer';
 import { getLogger } from '../../utils/logger';
+import { GameInfo } from '../../interfaces';
 
 /**
- * Get links of game pages from the index
+ * Get short information of game pages from the index
  *
  * @param browser Browser instance to run the query
- * @param pageN Number of the page (as the page uses)
+ * @param url     URL for the index page
  */
-export async function getIndexLinks(browser: Browser, url: string): Promise<string[]> {
+export async function getIndexLinks(browser: Browser, url: string): Promise<GameInfo[]> {
   const logger = getLogger();
   logger.log('info', `getIndexLinks(${url})`);
 
   const page = await browser.newPage();
   await page.goto(url);
-  const links = await page.$$eval(
-    '.thumb a[href^="/game/"]',
-    (links) => (links as HTMLAnchorElement[]).map((link) => link.href),
+  const gameList = await page.$$eval(
+    '.itemListGame',
+    (items) => (items as HTMLDivElement[]).map((item) => {
+      if (item.querySelector('.art')) {
+        return;
+      }
+
+      const link = item.querySelector('.name a') as HTMLAnchorElement;
+      const platform = (item.querySelector('.ptf') as HTMLSpanElement);
+      const year = (item.querySelector('.year') as HTMLSpanElement);
+
+      return {
+        pageUrl: link.href,
+        name: link.innerHTML,
+        meta: {
+          platform: platform && platform.innerHTML,
+          year: year && year.innerHTML,
+        },
+      };
+    }),
   );
 
   await page.close();
-  return links;
+  return gameList.filter((item) => item) as GameInfo[];
 }
 
 export async function getNumberOfIndexPages(browser: Browser, baseUrl: string): Promise<number> {
