@@ -47,7 +47,7 @@ async function storeGameDownloads(info: GameInfo): Promise<string[]> {
     const logger = getLogger();
     logger.log('debug', `storeGameDownloads(${info.name})`);
 
-    const promises = [];
+    const promises: Promise<string>[] = [];
 
     if (info.downloadLinks) {
       const requestOptions: request.CoreOptions = {
