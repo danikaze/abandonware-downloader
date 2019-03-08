@@ -1,5 +1,8 @@
+import { join } from 'path';
 import { Browser } from 'puppeteer';
 import { GameInfo } from '../interfaces';
+import { Cache } from '../utils/cache';
+import { getSettings } from '../utils/settings';
 
 export interface ParsedUrl {
   page: number;
@@ -7,6 +10,11 @@ export interface ParsedUrl {
 }
 
 export abstract class IndexPage {
+  private readonly cache = new Cache({
+    path: join(getSettings().internalDataPath, 'cache', 'index'),
+    ttl: getSettings().cacheIndexTtl,
+  });
+
   public abstract readonly name: string;
   public abstract readonly categories: string[];
 
@@ -61,9 +69,37 @@ export abstract class IndexPage {
     return this.setCategory(this.categories[index + 1]);
   }
 
-  public abstract async getNumberOfPages(browser: Browser): Promise<number>;
+  public async getNumberOfPages(browser: Browser): Promise<number> {
+    const cacheKey = `index-n-pages-${this.category}-${this.page}`;
 
-  public abstract async getLinks(browser: Browser): Promise<GameInfo[]>;
+    let data = await this.cache.get<number>(cacheKey);
+    if (data) {
+      return data;
+    }
+
+    data = await this.getActualNumberOfPages(browser);
+    this.cache.set(cacheKey, data);
+
+    return data;
+  }
+
+  public async getLinks(browser: Browser): Promise<GameInfo[]> {
+    const cacheKey = `index-links-${this.category}-${this.page}`;
+
+    let data = await this.cache.get<GameInfo[]>(cacheKey);
+    if (data) {
+      return data;
+    }
+
+    data = await this.getActualLinks(browser);
+    this.cache.set(cacheKey, data);
+
+    return data;
+  }
+
+  protected abstract async getActualNumberOfPages(browser: Browser): Promise<number>;
+
+  protected abstract async getActualLinks(browser: Browser): Promise<GameInfo[]>;
 
   protected abstract updateUrl(): string;
 

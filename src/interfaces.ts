@@ -52,6 +52,9 @@ export interface Settings {
 
   /** where the app will save internal data */
   internalDataPath?: string;
+  /** Cache for index pages / crawling */
+  cacheIndexTtl: number;
+
   debugCode?: boolean;
   log?: LogSettings[];
 }
