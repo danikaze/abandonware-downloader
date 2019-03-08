@@ -51,7 +51,7 @@ export interface Settings {
   gameInfoPath: string;
 
   /** where the app will save internal data */
-  internalDataDir?: string;
+  internalDataPath?: string;
   debugCode?: boolean;
   log?: LogSettings[];
 }

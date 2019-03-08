@@ -7,7 +7,7 @@ let settings: Settings;
 
 export function validateSettings(settings: Settings): Settings {
   const defaultValues: Partial<Settings> = {
-    internalDataDir: 'downloads/.abandonware-dl',
+    internalDataPath: 'downloads/.abandonware-dl',
     debugCode: false,
     log: [{
       level: 'error',
