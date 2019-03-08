@@ -4,7 +4,6 @@ import { sync as mkdirp } from 'mkdirp';
 import * as request from 'request';
 import { getLogger } from './logger';
 
-
 export async function getCookies(uri: string): Promise<string> {
   return new Promise<string>((resolve, reject) => {
     const jar = request.jar();
@@ -20,7 +19,11 @@ export async function getCookies(uri: string): Promise<string> {
   });
 }
 
-export async function downloadStatic(uri: string, outputFolder: string, options: request.CoreOptions = {}): Promise<void> {
+export async function downloadStatic(
+  uri: string,
+  outputFolder: string,
+  options: request.CoreOptions = {}
+): Promise<void> {
   return new Promise<void>((resolve, reject) => {
     const logger = getLogger();
 
