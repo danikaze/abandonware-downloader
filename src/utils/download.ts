@@ -19,12 +19,18 @@ export async function getCookies(uri: string): Promise<string> {
   });
 }
 
+/**
+ * Download the specified URL into the specified folder.
+ * Resolves to the final path where the static file is stored.
+ *
+ * @options Extra options to pass to `request`
+ */
 export async function downloadStatic(
   uri: string,
   outputFolder: string,
   options: request.CoreOptions = {}
-): Promise<void> {
-  return new Promise<void>((resolve, reject) => {
+): Promise<string> {
+  return new Promise<string>((resolve, reject) => {
     const logger = getLogger();
 
     if (!existsSync(outputFolder)) {
@@ -38,7 +44,7 @@ export async function downloadStatic(
         uri,
       };
       const req = request(requestOptions);
-      req.on('complete', () => resolve())
+      req.on('complete', () => resolve(finalPath))
          .on('error', reject)
          .on('response', (response) => {
            finalPath = join(outputFolder, basename(response.request.uri.path));
