@@ -4,10 +4,14 @@ import { Settings } from '../interfaces';
 import { getLogger } from './logger';
 
 let settings: Settings;
+const ONE_HOUR_SEC = 3600;
+const ONE_WEEK_SEC = ONE_HOUR_SEC * 24 * 7;
 
 export function validateSettings(settings: Settings): Settings {
   const defaultValues: Partial<Settings> = {
-    internalDataDir: 'downloads/.abandonware-dl',
+    internalDataPath: '[app]/../.abandonware-dl',
+    cacheGameInfoTtl: ONE_WEEK_SEC,
+    cacheIndexTtl: ONE_HOUR_SEC,
     debugCode: false,
     log: [{
       level: 'error',

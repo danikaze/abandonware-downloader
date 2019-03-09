@@ -6,6 +6,7 @@
 *.SUBLIME-PROJECT
 *.SUBLIME-WORKSPACE
 app
+.abandonware-dl
 coverage
 node_modules
 temp

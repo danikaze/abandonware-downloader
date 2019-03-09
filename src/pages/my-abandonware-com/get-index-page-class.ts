@@ -1,21 +1,21 @@
 import { Browser } from 'puppeteer';
 import { getNumberOfIndexPages, getIndexLinks } from './get-index-links';
-import { ParsedUrl, IndexPage } from '../index-page';
+import { ParsedUrl, BaseIndexPage, IndexPageConstructor } from '../index-page';
 import { GameInfo } from '../../interfaces';
 import { getLogger } from '../../utils/logger';
 
-export function getIndexPageClass(name: string, categoryName: string, categories: string[]) {
-  return class Index extends IndexPage {
+export function getIndexPageClass(name: string, categoryName: string, categories: string[]): IndexPageConstructor {
+  return class Index extends BaseIndexPage {
     public readonly name: string = name;
     public readonly categories: string[] = categories;
 
-    public async getNumberOfPages(browser: Browser): Promise<number> {
+    protected async getActualNumberOfPages(browser: Browser): Promise<number> {
       const data = this.parseUrl();
 
       return data && getNumberOfIndexPages(browser, this.url);
     }
 
-    public async getLinks(browser: Browser): Promise<GameInfo[]> {
+    protected async getActualLinks(browser: Browser): Promise<GameInfo[]> {
       return getIndexLinks(browser, this.url);
     }
 

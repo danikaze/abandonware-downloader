@@ -1,5 +1,3 @@
-import { getIndexPageClass } from './get-index-page-class';
-
 export const NAME_INITIALS = '$0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 export const YEARS = (() => {
   // tslint:disable:no-magic-numbers
@@ -48,8 +46,3 @@ export const GENRES = [
   'sports-8',
   'strategy-6',
 ];
-
-export const IndexName = getIndexPageClass('Name', 'name', NAME_INITIALS);
-export const IndexYear = getIndexPageClass('Year', 'year', YEARS);
-export const IndexPlatform = getIndexPageClass('Platform', 'platform', PLATFORMS);
-export const IndexGenre = getIndexPageClass('Genre', 'genre', GENRES);
