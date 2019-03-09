@@ -3,7 +3,8 @@ import { launch } from 'puppeteer';
 import { loadSettings, getSettingsPath, getSettings } from './utils/settings';
 import { getLogger, initLogger } from './utils/logger';
 import { discover, DiscoverInfo } from './discover';
-import { IndexPlatform } from './pages/my-abandonware-com/index-strategies';
+import { Site } from './pages/my-abandonware-com/site';
+import { createIndexPage } from './pages/index-page';
 
 function initApp(settingsFile: string) {
   const settings = loadSettings(settingsFile);
@@ -38,10 +39,12 @@ async function run() {
     }
   }
 
+  const site = new Site();
+
   // tslint:disable-next-line:no-magic-numbers
   await discover({
     browser,
-    index: new IndexPlatform('dos'),
+    index: createIndexPage(site.indexStrategies.Year, '1981'),
     onDiscover: onDiscoverCallback,
   });
 

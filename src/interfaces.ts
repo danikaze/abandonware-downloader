@@ -49,12 +49,14 @@ export interface Settings {
   gameScreenshotsPath: string;
   /** where game info (json) will be stored */
   gameInfoPath: string;
-
   /** where the app will save internal data */
   internalDataPath?: string;
-  /** Cache for index pages / crawling */
+  /** Cache TTL for index pages / crawling */
   cacheIndexTtl: number;
-
+  /** Cache TTL for game info pages */
+  cacheGameInfoTtl: number;
+  /** `true` to open DevTools */
   debugCode?: boolean;
+  /** List of log interfaces */
   log?: LogSettings[];
 }

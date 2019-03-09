@@ -9,7 +9,29 @@ export interface ParsedUrl {
   category: string;
 }
 
-export abstract class IndexPage {
+export interface IndexPageConstructor {
+  new(category: string, page?: number): IndexPage;
+}
+
+export interface IndexPage {
+  readonly name: string;
+  readonly categories: string[];
+  getUrl(): string;
+  getCategory(): string;
+  getPage(): number;
+  setCategory(category: string): string;
+  setPage(page: number): string;
+  nextPage(): string;
+  nextCategory(): string;
+  getNumberOfPages(browser: Browser): Promise<number>;
+  getLinks(browser: Browser): Promise<GameInfo[]>;
+}
+
+export function createIndexPage(ctor: IndexPageConstructor, category: string, page?: number): IndexPage {
+  return new ctor(category, page);
+}
+
+export abstract class BaseIndexPage implements IndexPage {
   private readonly cache = new Cache({
     path: join(getSettings().internalDataPath, 'cache', 'index'),
     ttl: getSettings().cacheIndexTtl,
