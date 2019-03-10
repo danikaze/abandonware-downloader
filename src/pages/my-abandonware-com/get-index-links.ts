@@ -28,10 +28,9 @@ export async function getIndexLinks(browser: Browser, url: string): Promise<Game
       return {
         pageUrl: link.href,
         name: link.innerHTML,
-        meta: {
-          platform: platform && platform.innerHTML,
-          year: year && year.innerHTML,
-        },
+        platform: platform && platform.innerHTML,
+        year: year && Number(year.innerHTML),
+        meta: {},
       };
     }),
   );

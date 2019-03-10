@@ -9,8 +9,8 @@ export function pathBuilder(path: Path, info: Partial<GameInfo> = {}): string {
   const values = {
     root: join(__dirname, '..', '..'),
     name: info.name || '',
-    platform: info.meta && info.meta.platform || '',
-    year: info.meta && info.meta.year || '',
+    platform: info.platform || '',
+    year: info.year || '',
     genre: info.meta && info.meta.genre || '',
     publisher: info.meta && info.meta.publisher || '',
   };

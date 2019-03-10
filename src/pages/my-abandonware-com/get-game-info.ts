@@ -1,5 +1,5 @@
 import { Browser, Page } from 'puppeteer';
-import { Dict, GameInfo, Link } from '../../interfaces';
+import { Dict, GameInfo, Link, Platform } from '../../interfaces';
 import { asyncParallel } from '../../utils/async-parallel';
 import { getLogger } from '../../utils/logger';
 import { toCamelCase } from '../../utils/to-camel-case';
@@ -21,7 +21,13 @@ async function getMeta(page: Page, info: GameInfo): Promise<void> {
       row.querySelector('td').innerText,
     ]))).forEach((meta) => {
       const metaName = toCamelCase(meta[0]);
-      info.meta[metaName] = meta[1];
+      if (metaName === 'platform') {
+        info.platform = meta[1] as Platform;
+      } else if (metaName === 'year') {
+        info.year = Number(meta[1]);
+      } else {
+        info.meta[metaName] = meta[1];
+      }
     });
   } catch (e) {
     const logger = getLogger();
@@ -248,6 +254,8 @@ export async function getGameInfo(browser: Browser, url: string): Promise<GameIn
   const info: GameInfo = {
     pageUrl: url,
     updated: new Date().getTime(),
+    platform: undefined,
+    year: undefined,
   };
 
   await Promise.all([

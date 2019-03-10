@@ -30,7 +30,7 @@ async function run() {
     console.log(`Discovered page ${info.currentPage}/${info.availablePages} of ${info.currentCategory}`);
     while (shownGames < info.gameList.length) {
       const game = info.gameList[shownGames++];
-      console.log(` * ${game.name} (${game.meta.year}) [${game.meta.platform}]`);
+      console.log(` * ${game.name} (${game.year}) [${game.platform}]`);
     }
 
     iterations--;
