@@ -5,7 +5,7 @@ import { getLogger } from './logger';
 
 let settings: Settings;
 const ONE_HOUR_SEC = 3600;
-const ONE_WEEK_SEC = ONE_HOUR_SEC * 24 * 7;
+const ONE_WEEK_SEC = 3600 * 24 * 7; // tslint:disable-line:no-magic-numbers
 
 export function validateSettings(settings: Settings): Settings {
   const defaultValues: Partial<Settings> = {

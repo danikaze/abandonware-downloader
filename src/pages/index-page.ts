@@ -1,7 +1,7 @@
 import { join } from 'path';
 import { Browser } from 'puppeteer';
 import { GameInfo } from '../interfaces';
-import { Cache } from '../utils/cache';
+import { Cache } from '../model/cache';
 import { getSettings } from '../utils/settings';
 
 export interface ParsedUrl {
@@ -32,17 +32,17 @@ export function createIndexPage(ctor: IndexPageConstructor, category: string, pa
 }
 
 export abstract class BaseIndexPage implements IndexPage {
-  private readonly cache = new Cache({
-    path: join(getSettings().internalDataPath, 'cache', 'index'),
-    ttl: getSettings().cacheIndexTtl,
-  });
-
   public abstract readonly name: string;
   public abstract readonly categories: string[];
 
   protected url: string;
   protected category: string;
   protected page: number;
+
+  private readonly cache = new Cache({
+    path: join(getSettings().internalDataPath, 'cache-index.db'),
+    ttl: getSettings().cacheIndexTtl,
+  });
 
   constructor(category: string, page: number = 1) {
     this.category = category;

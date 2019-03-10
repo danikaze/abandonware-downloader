@@ -1,5 +1,5 @@
 import { getSettings } from '../utils/settings';
-import { Cache } from '../utils/cache';
+import { Cache } from '../model/cache';
 import { BaseIndexPage, IndexPageConstructor } from './index-page';
 import { Dict, GameInfo } from '../interfaces';
 import { join } from 'path';
@@ -14,7 +14,7 @@ export abstract class SiteStrategies {
   public abstract readonly indexStrategies: Dict<IndexPageConstructor>;
 
   private readonly cache = new Cache({
-    path: join(getSettings().internalDataPath, 'cache', 'gameInfo'),
+    path: join(getSettings().internalDataPath, 'cache-gameInfo.db'),
     ttl: getSettings().cacheGameInfoTtl,
   });
 
