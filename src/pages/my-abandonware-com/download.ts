@@ -67,7 +67,13 @@ async function storeGameDownloads(info: GameInfo): Promise<string[]> {
           },
         });
         logger.log('debug', `downloading link ${link.url} => ${outputPath}`);
-        promises.push(downloadStatic(link.url, outputPath, requestOptions));
+        promises.push(
+          downloadStatic(link.url.remote, outputPath, requestOptions)
+            .then((localPath) => {
+              link.url.local = localPath;
+              return localPath;
+            })
+        );
       });
     }
 
@@ -96,7 +102,13 @@ async function storeGameScreenshots(info: GameInfo): Promise<string[]> {
             },
           );
           logger.log('debug', `downloading screenshot ${url} => ${outputPath}`);
-          promises.push(downloadStatic(url, outputPath));
+          promises.push(
+            downloadStatic(url.remote, outputPath)
+              .then((localPath) => {
+                url.local = localPath;
+                return localPath;
+              })
+          );
         });
       });
     }

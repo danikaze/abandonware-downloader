@@ -29,8 +29,13 @@ export type Platform = 'amiga'
                      | 'win3x'
                      | 'zx-spectrum';
 
+export interface Download {
+  remote: string;
+  local?: string;
+}
+
 export interface Link {
-  url: string;
+  url: Download;
   platform?: Platform;
   languages?: string[];
   info?: string;
@@ -49,7 +54,7 @@ export interface GameInfo {
   description?: string;
   playOnlineLink?: string;
   downloadLinks?: Link[];
-  screenshots?: Dict<string[]>; // { platform: urls[] }
+  screenshots?: Partial<{ [platform in Platform]: Download[] }>;
   howTo?: string;
 }
 
