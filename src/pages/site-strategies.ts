@@ -3,6 +3,7 @@ import { Cache } from '../model/cache';
 import { BaseIndexPage, IndexPageConstructor } from './index-page';
 import { Dict, GameInfo } from '../interfaces';
 import { join } from 'path';
+import { Browser } from 'puppeteer';
 
 export interface IndexStrategy {
   strategies: string[];
@@ -18,19 +19,19 @@ export abstract class SiteStrategies {
     ttl: getSettings().cacheGameInfoTtl,
   });
 
-  public async getGameInfo(info: GameInfo): Promise<GameInfo> {
-    const cacheKey = `gameinfo-${info.name}`;
+  public async getGameInfo(browser: Browser, url: string): Promise<GameInfo> {
+    const cacheKey = url;
 
     let data = await this.cache.get<GameInfo>(cacheKey);
     if (data) {
       return data;
     }
 
-    data = await this.getActualGameInfo(info);
+    data = await this.getActualGameInfo(browser, url);
     this.cache.set(cacheKey, data);
 
     return data;
   }
 
-  protected abstract async getActualGameInfo(info: GameInfo): Promise<GameInfo>;
+  protected abstract async getActualGameInfo(browser: Browser, url: string): Promise<GameInfo>;
 }
