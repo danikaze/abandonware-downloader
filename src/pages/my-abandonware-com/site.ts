@@ -5,6 +5,7 @@ import { getIndexPageClass } from './get-index-page-class';
 import { NAME_INITIALS, YEARS, PLATFORMS, GENRES } from './constants';
 import { getGameInfo } from './get-game-info';
 import { Browser } from 'puppeteer';
+import { downloadStatic } from '../../utils/download';
 
 export const IndexName = getIndexPageClass('Name', 'name', NAME_INITIALS);
 export const IndexYear = getIndexPageClass('Year', 'year', YEARS);
@@ -23,5 +24,9 @@ export class Site extends SiteStrategies {
 
   protected async getActualGameInfo(browser: Browser, url: string): Promise<GameInfo> {
     return await getGameInfo(browser, url);
+  }
+
+  protected async downloadScreenshot(url: string, outputFolder: string): Promise<string> {
+    return await downloadStatic(url, outputFolder);
   }
 }

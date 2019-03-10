@@ -10,7 +10,6 @@ import { getCookies, downloadStatic } from '../../utils/download';
 export interface DownloadInfoOptions {
   info?: boolean;
   downloads?: boolean;
-  screenshots?: boolean;
 }
 
 async function storeGameInfo(info: GameInfo): Promise<string> {
@@ -81,42 +80,6 @@ async function storeGameDownloads(info: GameInfo): Promise<string[]> {
   });
 }
 
-async function storeGameScreenshots(info: GameInfo): Promise<string[]> {
-  return new Promise<string[]>((resolve, reject) => {
-    const logger = getLogger();
-    logger.log('debug', `storeGameScreenshots(${info.name})`);
-
-    const promises = [];
-
-    if (info.screenshots) {
-      Object.keys(info.screenshots).forEach((platform) => {
-        info.screenshots[platform].forEach((url) => {
-          const outputPath = pathBuilder(
-            'gameScreenshots',
-            {
-              ...info,
-              meta: {
-                ...info.meta,
-                platform,
-              },
-            },
-          );
-          logger.log('debug', `downloading screenshot ${url} => ${outputPath}`);
-          promises.push(
-            downloadStatic(url.remote, outputPath)
-              .then((localPath) => {
-                url.local = localPath;
-                return localPath;
-              })
-          );
-        });
-      });
-    }
-
-    Promise.all(promises).then(resolve, reject);
-  });
-}
-
 /**
  * Download game's data:
  * - info json
@@ -129,7 +92,6 @@ export async function downloadGame(info: GameInfo, options?: DownloadInfoOptions
   const opt = {
     info: true,
     downloads: true,
-    screenshots: true,
     ...options,
   };
   const promises = [];
@@ -142,10 +104,6 @@ export async function downloadGame(info: GameInfo, options?: DownloadInfoOptions
 
   if (opt.downloads) {
     promises.push(storeGameDownloads(info));
-  }
-
-  if (opt.screenshots) {
-    promises.push(storeGameScreenshots(info));
   }
 
   await Promise.all(promises);
