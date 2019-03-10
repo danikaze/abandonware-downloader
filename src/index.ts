@@ -6,7 +6,7 @@ import { discover, DiscoverInfo } from './discover';
 import { Site } from './pages/my-abandonware-com/site';
 import { createIndexPage } from './pages/index-page';
 
-function initApp(settingsFile: string) {
+async function initApp(settingsFile: string) {
   const settings = loadSettings(settingsFile);
   initLogger(settings.log);
 
@@ -15,7 +15,7 @@ function initApp(settingsFile: string) {
 }
 
 async function run() {
-  initApp(getSettingsPath());
+  await initApp(getSettingsPath());
   const settings = getSettings();
 
   const browser = await launch({
