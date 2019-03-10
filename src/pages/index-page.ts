@@ -92,7 +92,7 @@ export abstract class BaseIndexPage implements IndexPage {
   }
 
   public async getNumberOfPages(browser: Browser): Promise<number> {
-    const cacheKey = `index-n-pages-${this.category}-${this.page}`;
+    const cacheKey = `n-${this.getUrl()}`;
 
     let data = await this.cache.get<number>(cacheKey);
     if (data) {
@@ -106,7 +106,7 @@ export abstract class BaseIndexPage implements IndexPage {
   }
 
   public async getLinks(browser: Browser): Promise<GameInfo[]> {
-    const cacheKey = `index-links-${this.category}-${this.page}`;
+    const cacheKey = `l-${this.getUrl()}`;
 
     let data = await this.cache.get<GameInfo[]>(cacheKey);
     if (data) {
