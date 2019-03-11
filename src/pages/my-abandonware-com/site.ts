@@ -5,7 +5,6 @@ import { getIndexPageClass } from './get-index-page-class';
 import { NAME_INITIALS, YEARS, PLATFORMS, GENRES } from './constants';
 import { getGameInfo } from './get-game-info';
 import { Browser } from 'puppeteer';
-import { downloadStatic } from '../../utils/download';
 
 export const IndexName = getIndexPageClass('Name', 'name', NAME_INITIALS);
 export const IndexYear = getIndexPageClass('Year', 'year', YEARS);
@@ -14,7 +13,6 @@ export const IndexGenre = getIndexPageClass('Genre', 'genre', GENRES);
 
 export class Site extends SiteStrategies {
   public readonly name = 'myabandonware.com';
-
   public readonly indexStrategies: Dict<IndexPageConstructor> = {
     Name: IndexName,
     Year: IndexYear,
@@ -22,11 +20,10 @@ export class Site extends SiteStrategies {
     Genre: IndexGenre,
   };
 
+  protected readonly needsCookiesForGameScreenshots = false;
+  protected readonly needsCookiesForGameLinks = true;
+
   protected async getActualGameInfo(browser: Browser, url: string): Promise<GameInfo> {
     return await getGameInfo(browser, url);
-  }
-
-  protected async downloadScreenshot(url: string, outputFolder: string): Promise<string> {
-    return await downloadStatic(url, outputFolder);
   }
 }
