@@ -36,6 +36,7 @@ export interface Download {
 
 export interface Link {
   url: Download;
+  year?: number;
   platform?: Platform;
   languages?: string[];
   info?: string;

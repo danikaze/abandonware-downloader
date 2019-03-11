@@ -143,123 +143,130 @@ async function getDescription(page: Page, info: GameInfo): Promise<void> {
  */
 async function getDownloadLinks(page: Page, info: GameInfo): Promise<void> {
   try {
-    const links = await page.$$eval('#download .platformDownload, #download .platformMeta, #download .buttons', (elems: HTMLElement[]) => {
-      function isUnneeded(elem: HTMLElement): boolean {
-        return elem.classList.contains('art');
-      }
-
-      function processVersion(elem, link: Link): boolean {
-        if (elem.className !== 'platformDownload') {
-          return false;
+    const links = await page.$$eval(
+      '#download .platformDownload, #download .platformMeta, #download .buttons',
+      (elems: HTMLElement[]) => {
+        function isUnneeded(elem: HTMLElement): boolean {
+          return elem.classList.contains('art');
         }
 
-        link.platform = elem.id;
-        link.meta = undefined;
-        link.info = undefined;
-        link.languages = undefined;
-        return true;
-      }
-
-      function processMeta(elem: HTMLElement, link: Link): boolean {
-        if (elem.className !== 'platformMeta') {
-          return false;
-        }
-        link.meta = {};
-        Array
-          .from(elem.children)
-          .forEach((li: HTMLLIElement) => {
-            const key = (li.children[0] as HTMLSpanElement).innerText.replace(':', '');
-            const value = (li.children[1] as HTMLAnchorElement).innerText;
-            link.meta[key] = value;
-          });
-        return true;
-      }
-
-      function processBigButtons(elem: HTMLElement, link: Link, links: Link[]): boolean {
-        if (elem.className !== 'buttons') {
-          return false;
-        }
-
-        const children = Array.from(elem.querySelectorAll('a'));
-        for (const child of children) {
-          link.url = { remote: child.href };
-
-          const imgs = Array.from(child.querySelectorAll('span img')) as HTMLImageElement[];
-          if (imgs.length > 0) {
-            link.languages = imgs.length > 0 ? imgs.map((img) => /([^/.]+)\.gif$/.exec(img.src)[1]) : undefined;
+        function processVersion(elem, link: Link): boolean {
+          if (elem.className !== 'platformDownload') {
+            return false;
           }
 
-          const spans = Array.from(child.querySelectorAll('span')) as HTMLSpanElement[];
-          spans.forEach((span) => span.parentElement.removeChild(span));
-
-          link.info = child.innerHTML || undefined;
-          links.push({ ...link });
+          link.platform = elem.id;
+          link.meta = undefined;
+          link.info = undefined;
+          link.languages = undefined;
+          return true;
         }
-        return true;
-      }
 
-      function processSmallButtons(elem: HTMLElement, link: Link, links: Link[]): boolean {
-        if (!elem.classList.contains('buttons') && !elem.classList.contains('list')) {
-          return false;
-        }
-        const children = Array.from(elem.children);
-        for (const child of children) {
-          if (child.classList.contains('cBoth')) {
-            continue;
+        function processMeta(elem: HTMLElement, link: Link): boolean {
+          if (elem.className !== 'platformMeta') {
+            return false;
           }
-          if (child instanceof HTMLAnchorElement) {
+          link.meta = {};
+          Array
+            .from(elem.children)
+            .forEach((li: HTMLLIElement) => {
+              const key = (li.children[0] as HTMLSpanElement).innerText.replace(':', '');
+              const value = (li.children[1] as HTMLAnchorElement).innerText;
+              if (key.toLowerCase() === 'year') {
+                link.year = Number(value);
+              } else {
+                link.meta[key] = value;
+              }
+            });
+          return true;
+        }
+
+        function processBigButtons(elem: HTMLElement, link: Link, links: Link[]): boolean {
+          if (elem.className !== 'buttons') {
+            return false;
+          }
+
+          const children = Array.from(elem.querySelectorAll('a'));
+          for (const child of children) {
             link.url = { remote: child.href };
-            link.languages = undefined;
-            link.info = undefined;
+
+            const imgs = Array.from(child.querySelectorAll('span img')) as HTMLImageElement[];
+            if (imgs.length > 0) {
+              link.languages = imgs.length > 0 ? imgs.map((img) => /([^/.]+)\.gif$/.exec(img.src)[1]) : undefined;
+            }
+
+            const spans = Array.from(child.querySelectorAll('span')) as HTMLSpanElement[];
+            spans.forEach((span) => span.parentElement.removeChild(span));
+
+            link.info = child.innerHTML || undefined;
+            links.push({ ...link });
+          }
+          return true;
+        }
+
+        function processSmallButtons(elem: HTMLElement, link: Link, links: Link[]): boolean {
+          if (!elem.classList.contains('buttons') && !elem.classList.contains('list')) {
+            return false;
+          }
+          const children = Array.from(elem.children);
+          for (const child of children) {
+            if (child.classList.contains('cBoth')) {
+              continue;
+            }
+            if (child instanceof HTMLAnchorElement) {
+              link.url = { remote: child.href };
+              link.languages = undefined;
+              link.info = undefined;
+              continue;
+            }
+            if (child instanceof HTMLSpanElement) {
+              link.info = child.innerHTML;
+              link.info = link.info.substring(0, link.info.indexOf('<')).trim();
+              const imgs = Array.from(child.querySelectorAll('span img')) as HTMLImageElement[];
+              link.languages = imgs.map((img) => /([^/.]+)\.gif$/.exec(img.src)[1]);
+              links.push({ ...link });
+              link.url = undefined;
+              link.languages = undefined;
+              link.info = undefined;
+            }
+          }
+          if (link.url) {
+            links.push({ ...link });
+          }
+        }
+
+        const links: Link[] = [];
+        const link: Link = {
+          url: undefined,
+        };
+
+        let i = -1;
+        while (i + 1 < elems.length) {
+          i++;
+          const elem = elems[i];
+
+          if (isUnneeded(elem)) {
             continue;
           }
-          if (child instanceof HTMLSpanElement) {
-            link.info = child.innerHTML;
-            link.info = link.info.substring(0, link.info.indexOf('<')).trim();
-            const imgs = Array.from(child.querySelectorAll('span img')) as HTMLImageElement[];
-            link.languages = imgs.map((img) => /([^/.]+)\.gif$/.exec(img.src)[1]);
-            links.push({ ...link });
-            link.url = undefined;
-            link.languages = undefined;
-            link.info = undefined;
+
+          if (processVersion(elem, link)) {
+            continue;
+          }
+          if (processMeta(elem, link)) {
+            continue;
+          }
+          if (processBigButtons(elem, link, links)) {
+            continue;
+          }
+
+          if (processSmallButtons(elem, link, links)) {
+            continue;
           }
         }
-        if (link.url) {
-          links.push({ ...link });
-        }
-      }
 
-      const links: Link[] = [];
-      const link: Link = {
-        url: undefined,
-      };
-
-      let i = -1;
-      while (i + 1 < elems.length) {
-        i++;
-        const elem = elems[i];
-
-        if (isUnneeded(elem)) {
-          continue;
-        }
-
-        if (processVersion(elem, link)) {
-          continue;
-        }
-        if (processMeta(elem, link)) {
-          continue;
-        }
-        if (processBigButtons(elem, link, links)) {
-          continue;
-        }
-
-        if (processSmallButtons(elem, link, links)) {
-          continue;
-        }
-      }
-
-      return links;
-    });
+        return links;
+      },
+    );
 
     info.downloadLinks = links;
   } catch (e) {
