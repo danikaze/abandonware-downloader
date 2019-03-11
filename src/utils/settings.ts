@@ -4,14 +4,14 @@ import { Settings } from '../interfaces';
 import { getLogger } from './logger';
 
 let settings: Settings;
-const ONE_HOUR_SEC = 3600;
-const ONE_WEEK_SEC = 3600 * 24 * 7; // tslint:disable-line:no-magic-numbers
+const ONE_WEEK_SECS = 3600 * 24 * 7; // tslint:disable-line:no-magic-numbers
+const ONE_MONTH_SECS = 3600 * 24 * 30; // tslint:disable-line:no-magic-numbers
 
 export function validateSettings(settings: Settings): Settings {
   const defaultValues: Partial<Settings> = {
     internalDataPath: '[app]/../.abandonware-dl',
-    cacheGameInfoTtl: ONE_WEEK_SEC,
-    cacheIndexTtl: ONE_HOUR_SEC,
+    cacheGameInfoTtl: ONE_MONTH_SECS,
+    cacheIndexTtl: ONE_WEEK_SECS,
     debugCode: false,
     log: [{
       level: 'error',
