@@ -25,8 +25,9 @@ async function run() {
 
   let shownGames = 0;
   let iterations = 3;
+  let searchInfo;
 
-  function onDiscoverCallback(info: DiscoverInfo, requestStop: () => void) {
+  async function onDiscoverCallback(info: DiscoverInfo, requestStop: () => void) {
     console.log(`Discovered page ${info.currentPage}/${info.availablePages} of ${info.currentCategory}`);
     while (shownGames < info.gameList.length) {
       const game = info.gameList[shownGames++];
@@ -36,6 +37,7 @@ async function run() {
     iterations--;
     if (iterations === 0) {
       requestStop();
+      searchInfo = info.gameList[0];
     }
   }
 
@@ -47,6 +49,12 @@ async function run() {
     index: createIndexPage(site.indexStrategies.Year, '1981'),
     onDiscover: onDiscoverCallback,
   });
+
+  console.log(JSON.stringify(searchInfo, null, 2));
+  const fullInfo = await site.getGameInfo(browser, searchInfo.pageUrl);
+  console.log(JSON.stringify(fullInfo, null, 2));
+  await site.downloadScreenshots(fullInfo);
+  await site.downloadGameLinks(fullInfo);
 
   await browser.close();
 }
