@@ -10,7 +10,6 @@ import { getCookies, downloadStatic } from '../../utils/download';
 export interface DownloadInfoOptions {
   info?: boolean;
   downloads?: boolean;
-  screenshots?: boolean;
 }
 
 async function storeGameInfo(info: GameInfo): Promise<string> {
@@ -67,37 +66,13 @@ async function storeGameDownloads(info: GameInfo): Promise<string[]> {
           },
         });
         logger.log('debug', `downloading link ${link.url} => ${outputPath}`);
-        promises.push(downloadStatic(link.url, outputPath, requestOptions));
-      });
-    }
-
-    Promise.all(promises).then(resolve, reject);
-  });
-}
-
-async function storeGameScreenshots(info: GameInfo): Promise<string[]> {
-  return new Promise<string[]>((resolve, reject) => {
-    const logger = getLogger();
-    logger.log('debug', `storeGameScreenshots(${info.name})`);
-
-    const promises = [];
-
-    if (info.screenshots) {
-      Object.keys(info.screenshots).forEach((platform) => {
-        info.screenshots[platform].forEach((url) => {
-          const outputPath = pathBuilder(
-            'gameScreenshots',
-            {
-              ...info,
-              meta: {
-                ...info.meta,
-                platform,
-              },
-            },
-          );
-          logger.log('debug', `downloading screenshot ${url} => ${outputPath}`);
-          promises.push(downloadStatic(url, outputPath));
-        });
+        promises.push(
+          downloadStatic(link.url.remote, outputPath, requestOptions)
+            .then((localPath) => {
+              link.url.local = localPath;
+              return localPath;
+            })
+        );
       });
     }
 
@@ -117,7 +92,6 @@ export async function downloadGame(info: GameInfo, options?: DownloadInfoOptions
   const opt = {
     info: true,
     downloads: true,
-    screenshots: true,
     ...options,
   };
   const promises = [];
@@ -130,10 +104,6 @@ export async function downloadGame(info: GameInfo, options?: DownloadInfoOptions
 
   if (opt.downloads) {
     promises.push(storeGameDownloads(info));
-  }
-
-  if (opt.screenshots) {
-    promises.push(storeGameScreenshots(info));
   }
 
   await Promise.all(promises);

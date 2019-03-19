@@ -2,9 +2,42 @@ import { FileTransportOptions } from 'winston/lib/winston/transports';
 
 export type Dict<T> = { [key: string]: T };
 
+export type Platform = 'amiga'
+                     | 'amiga-cd32'
+                     | 'cpc'
+                     | 'apple2'
+                     | 'apple2gs'
+                     | 'atari-8-bit'
+                     | 'atari-st'
+                     | 'colecovision'
+                     | 'commodore-16-plus4'
+                     | 'c64'
+                     | 'dos'
+                     | 'dragon-3264'
+                     | 'game-gear'
+                     | 'genesis'
+                     | 'linux'
+                     | 'mac'
+                     | 'msx'
+                     | 'pc88'
+                     | 'pc98'
+                     | 'sega-32x'
+                     | 'sega-cd'
+                     | 'sega-master-system'
+                     | 'vic-20'
+                     | 'windows'
+                     | 'win3x'
+                     | 'zx-spectrum';
+
+export interface Download {
+  remote: string;
+  local?: string;
+}
+
 export interface Link {
-  url: string;
-  platform?: string;
+  url: Download;
+  year?: number;
+  platform?: Platform;
   languages?: string[];
   info?: string;
   meta?: Dict<string>;
@@ -14,13 +47,15 @@ export interface GameInfo {
   pageUrl: string;
   updated?: number;
   name?: string;
+  year?: number;
+  platform: Platform;
   meta?: Dict<string>;
   score?: number;
   votes?: number;
   description?: string;
   playOnlineLink?: string;
   downloadLinks?: Link[];
-  screenshots?: Dict<string[]>; // { platform: urls[] }
+  screenshots?: Partial<{ [platform in Platform]: Download[] }>;
   howTo?: string;
 }
 

@@ -1,9 +1,12 @@
 import { Browser, Page } from 'puppeteer';
-import { Dict, GameInfo, Link } from '../../interfaces';
+import { Dict, GameInfo, Link, Platform, Download } from '../../interfaces';
 import { asyncParallel } from '../../utils/async-parallel';
 import { getLogger } from '../../utils/logger';
 import { toCamelCase } from '../../utils/to-camel-case';
 
+/**
+ * Get the game name from the title
+ */
 async function getName(page: Page, info: GameInfo): Promise<void> {
   try {
     info.name = await page.$eval('.box h2', (elem: HTMLHeadElement) => elem.innerHTML);
@@ -13,6 +16,9 @@ async function getName(page: Page, info: GameInfo): Promise<void> {
   }
 }
 
+/**
+ * Get the game release year/first platform/metadata from the description table
+ */
 async function getMeta(page: Page, info: GameInfo): Promise<void> {
   info.meta = {};
   try {
@@ -21,7 +27,13 @@ async function getMeta(page: Page, info: GameInfo): Promise<void> {
       row.querySelector('td').innerText,
     ]))).forEach((meta) => {
       const metaName = toCamelCase(meta[0]);
-      info.meta[metaName] = meta[1];
+      if (metaName === 'platform') {
+        info.platform = meta[1] as Platform;
+      } else if (metaName === 'year') {
+        info.year = Number(meta[1]);
+      } else {
+        info.meta[metaName] = meta[1];
+      }
     });
   } catch (e) {
     const logger = getLogger();
@@ -29,6 +41,9 @@ async function getMeta(page: Page, info: GameInfo): Promise<void> {
   }
 }
 
+/**
+ * Get the average score and the number of votes
+ */
 async function getScore(page: Page, info: GameInfo): Promise<void> {
   try {
     const scoreInfo = await page.$eval(
@@ -46,12 +61,18 @@ async function getScore(page: Page, info: GameInfo): Promise<void> {
   }
 }
 
+/**
+ * If there's a "Play Online" link, get it
+ */
 async function getPlayOnlineLink(page: Page, info: GameInfo): Promise<void> {
   try {
     info.playOnlineLink = await page.$eval('.gamePlay a', (a: HTMLAnchorElement) => a.href);
   } catch (e) {}
 }
 
+/**
+ * Get the list of platforms (for the screenshots) from the captures tab
+ */
 async function getPlatforms(page: Page, info: GameInfo): Promise<Dict<string>> {
   const platforms = {};
 
@@ -69,12 +90,15 @@ async function getPlatforms(page: Page, info: GameInfo): Promise<Dict<string>> {
   return platforms;
 }
 
+/**
+ * Get the list of screenshots for each platform
+ */
 async function getScreenshots(page: Page, info: GameInfo): Promise<void> {
-  async function getPlatformScreenshots(platformId): Promise<string[]> {
+  async function getPlatformScreenshots(platformId): Promise<Download[]> {
     try {
       const screenshots = await page.$$eval(
         `.items.screens[data-platform="${platformId}"] .thumb a`,
-        (imgs: HTMLAnchorElement[]) => imgs.map((img) => img.href),
+        (imgs: HTMLAnchorElement[]) => imgs.map((img) => ({ remote: img.href })),
       );
       return screenshots;
     } catch (e) {
@@ -93,6 +117,9 @@ async function getScreenshots(page: Page, info: GameInfo): Promise<void> {
   });
 }
 
+/**
+ * Get the description in HTML
+ */
 async function getDescription(page: Page, info: GameInfo): Promise<void> {
   // multiple <p> descriptions
   try {
@@ -111,125 +138,135 @@ async function getDescription(page: Page, info: GameInfo): Promise<void> {
   }
 }
 
+/**
+ * Get the download links for each platform
+ */
 async function getDownloadLinks(page: Page, info: GameInfo): Promise<void> {
   try {
-    const links = await page.$$eval('#download .platformDownload, #download .buttons', (elems: HTMLElement[]) => {
-      function isUnneeded(elem: HTMLElement): boolean {
-        return elem.classList.contains('art');
-      }
-
-      function processVersion(elem, link: Link): boolean {
-        if (elem.className !== 'platformDownload') {
-          return false;
+    const links = await page.$$eval(
+      '#download .platformDownload, #download .platformMeta, #download .buttons',
+      (elems: HTMLElement[]) => {
+        function isUnneeded(elem: HTMLElement): boolean {
+          return elem.classList.contains('art');
         }
 
-        link.platform = elem.id;
-        link.meta = undefined;
-        link.info = undefined;
-        link.languages = undefined;
-        return true;
-      }
+        function processVersion(elem, link: Link): boolean {
+          if (elem.className !== 'platformDownload') {
+            return false;
+          }
 
-      function processMeta(elem: HTMLElement, link: Link): boolean {
-        if (elem.className !== 'platformMeta') {
-          return false;
+          link.platform = elem.id;
+          link.meta = undefined;
+          link.info = undefined;
+          link.languages = undefined;
+          return true;
         }
-        link.meta = {};
-        Array.from(elem.children)
-              .forEach((li: HTMLLIElement) => {
-                const key = (li.children[0] as HTMLSpanElement).innerText;
-                const value = (li.children[0] as HTMLAnchorElement).innerText;
+
+        function processMeta(elem: HTMLElement, link: Link): boolean {
+          if (elem.className !== 'platformMeta') {
+            return false;
+          }
+          link.meta = {};
+          Array
+            .from(elem.children)
+            .forEach((li: HTMLLIElement) => {
+              const key = (li.children[0] as HTMLSpanElement).innerText.replace(':', '');
+              const value = (li.children[1] as HTMLAnchorElement).innerText;
+              if (key.toLowerCase() === 'year') {
+                link.year = Number(value);
+              } else {
                 link.meta[key] = value;
-              });
-        return true;
-      }
-
-      function processBigButtons(elem: HTMLElement, link: Link, links: Link[]): boolean {
-        if (elem.className !== 'buttons') {
-          return false;
+              }
+            });
+          return true;
         }
 
-        const children = Array.from(elem.querySelectorAll('a'));
-        for (const child of children) {
-          link.url = child.href;
-
-          const imgs = Array.from(child.querySelectorAll('span img')) as HTMLImageElement[];
-          if (imgs.length > 0) {
-            link.languages = imgs.length > 0 ? imgs.map((img) => /([^/.]+)\.gif$/.exec(img.src)[1]) : undefined;
+        function processBigButtons(elem: HTMLElement, link: Link, links: Link[]): boolean {
+          if (elem.className !== 'buttons') {
+            return false;
           }
 
-          const spans = Array.from(child.querySelectorAll('span')) as HTMLSpanElement[];
-          spans.forEach((span) => span.parentElement.removeChild(span));
+          const children = Array.from(elem.querySelectorAll('a'));
+          for (const child of children) {
+            link.url = { remote: child.href };
 
-          link.info = child.innerHTML || undefined;
-          links.push({ ...link });
-        }
-        return true;
-      }
-
-      function processSmallButtons(elem: HTMLElement, link: Link, links: Link[]): boolean {
-        if (!elem.classList.contains('buttons') && !elem.classList.contains('list')) {
-          return false;
-        }
-        const children = Array.from(elem.children);
-        for (const child of children) {
-          if (child.classList.contains('cBoth')) {
-            continue;
-          }
-          if (child instanceof HTMLAnchorElement) {
-            link.url = child.href;
-            link.languages = undefined;
-            link.info = undefined;
-            continue;
-          }
-          if (child instanceof HTMLSpanElement) {
-            link.info = child.innerHTML;
-            link.info = link.info.substring(0, link.info.indexOf('<')).trim();
             const imgs = Array.from(child.querySelectorAll('span img')) as HTMLImageElement[];
-            link.languages = imgs.map((img) => /([^/.]+)\.gif$/.exec(img.src)[1]);
+            if (imgs.length > 0) {
+              link.languages = imgs.length > 0 ? imgs.map((img) => /([^/.]+)\.gif$/.exec(img.src)[1]) : undefined;
+            }
+
+            const spans = Array.from(child.querySelectorAll('span')) as HTMLSpanElement[];
+            spans.forEach((span) => span.parentElement.removeChild(span));
+
+            link.info = child.innerHTML || undefined;
             links.push({ ...link });
-            link.url = undefined;
-            link.languages = undefined;
-            link.info = undefined;
+          }
+          return true;
+        }
+
+        function processSmallButtons(elem: HTMLElement, link: Link, links: Link[]): boolean {
+          if (!elem.classList.contains('buttons') && !elem.classList.contains('list')) {
+            return false;
+          }
+          const children = Array.from(elem.children);
+          for (const child of children) {
+            if (child.classList.contains('cBoth')) {
+              continue;
+            }
+            if (child instanceof HTMLAnchorElement) {
+              link.url = { remote: child.href };
+              link.languages = undefined;
+              link.info = undefined;
+              continue;
+            }
+            if (child instanceof HTMLSpanElement) {
+              link.info = child.innerHTML;
+              link.info = link.info.substring(0, link.info.indexOf('<')).trim();
+              const imgs = Array.from(child.querySelectorAll('span img')) as HTMLImageElement[];
+              link.languages = imgs.map((img) => /([^/.]+)\.gif$/.exec(img.src)[1]);
+              links.push({ ...link });
+              link.url = undefined;
+              link.languages = undefined;
+              link.info = undefined;
+            }
+          }
+          if (link.url) {
+            links.push({ ...link });
           }
         }
-        if (link.url) {
-          links.push({ ...link });
-        }
-      }
 
-      debugger;
-      const links: Link[] = [];
-      const link: Link = {
-        url: undefined,
-      };
+        const links: Link[] = [];
+        const link: Link = {
+          url: undefined,
+        };
 
-      let i = -1;
-      while (i + 1 < elems.length) {
-        i++;
-        const elem = elems[i];
+        let i = -1;
+        while (i + 1 < elems.length) {
+          i++;
+          const elem = elems[i];
 
-        if (isUnneeded(elem)) {
-          continue;
+          if (isUnneeded(elem)) {
+            continue;
+          }
+
+          if (processVersion(elem, link)) {
+            continue;
+          }
+          if (processMeta(elem, link)) {
+            continue;
+          }
+          if (processBigButtons(elem, link, links)) {
+            continue;
+          }
+
+          if (processSmallButtons(elem, link, links)) {
+            continue;
+          }
         }
 
-        if (processVersion(elem, link)) {
-          continue;
-        }
-        if (processMeta(elem, link)) {
-          continue;
-        }
-        if (processBigButtons(elem, link, links)) {
-          continue;
-        }
-
-        if (processSmallButtons(elem, link, links)) {
-          continue;
-        }
-      }
-
-      return links;
-    });
+        return links;
+      },
+    );
 
     info.downloadLinks = links;
   } catch (e) {
@@ -248,6 +285,8 @@ export async function getGameInfo(browser: Browser, url: string): Promise<GameIn
   const info: GameInfo = {
     pageUrl: url,
     updated: new Date().getTime(),
+    platform: undefined,
+    year: undefined,
   };
 
   await Promise.all([
