@@ -16,7 +16,7 @@ export interface DiscoverOptions {
   /** If specified, it will use this options when `browser` is not specified */
   browserLaunchOptions?: LaunchOptions;
   /** Function called when a game info is retrieved */
-  onDiscover?(info: DiscoverInfo, requestStop: () => void): void;
+  onDiscover?(info: DiscoverInfo, requestStop: () => void): void | Promise<void>;
 }
 
 const defaultOptions: Partial<DiscoverOptions> = {
@@ -72,7 +72,7 @@ export async function discover(options: DiscoverOptions): Promise<DiscoverInfo> 
       while (info.currentPage <= info.availablePages) {
         info.gameList.push.apply(info.gameList, await index.getLinks(browser));
         if (opt.onDiscover) {
-          opt.onDiscover({ ...info }, requestStop);
+          await opt.onDiscover({ ...info }, requestStop);
         }
 
         if (stopRequested) {
