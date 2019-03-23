@@ -1,5 +1,5 @@
 export interface QueueOptions<T> {
-  consumer(item: T): Promise<void>;
+  consumer(item: T, remaining: number): Promise<void>;
   threads?: number;
 }
 
@@ -65,7 +65,7 @@ export class Queue<T = any> {
     this.active++;
     const item = this.items.shift();
     this.options
-      .consumer(item)
+      .consumer(item, this.items.length)
       .finally(() => {
         this.active--;
         this.tryProcess();
