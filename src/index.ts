@@ -5,6 +5,8 @@ import { getLogger, initLogger } from './utils/logger';
 import { discover, DiscoverInfo } from './discover';
 import { Site } from './pages/my-abandonware-com/site';
 import { createIndexPage } from './pages/index-page';
+import { Queue } from './utils/queue';
+import { GameInfo } from './interfaces';
 
 async function initApp(settingsFile: string) {
   const settings = loadSettings(settingsFile);
@@ -15,48 +17,41 @@ async function initApp(settingsFile: string) {
 }
 
 async function run() {
+  async function getFullGameInfo(site: Site, game: GameInfo, remaining: number): Promise<void> {
+    console.log(` * ${game.name} (${game.year}) [${game.platform}] (${remaining} games remaining)`);
+    await site.getGameInfo(browser, game.pageUrl);
+  }
+
   await initApp(getSettingsPath());
   const settings = getSettings();
 
+  const site = new Site();
   const browser = await launch({
     headless: !settings.debugCode,
     devtools: settings.debugCode,
   });
 
   let shownGames = 0;
-  let iterations = 3;
-  let searchInfo;
+  const queue = new Queue<GameInfo>({
+    threads: 5,
+    consumer: getFullGameInfo.bind(null, site),
+  });
 
-  async function onDiscoverCallback(info: DiscoverInfo, requestStop: () => void) {
-    console.log(`Discovered page ${info.currentPage}/${info.availablePages} of ${info.currentCategory}`);
+  async function onDiscoverCallback(info: DiscoverInfo, requestStop: () => void): Promise<void> {
+    // console.log(`Discovered page ${info.currentPage}/${info.availablePages} of ${info.currentCategory}`);
     while (shownGames < info.gameList.length) {
       const game = info.gameList[shownGames++];
-      console.log(` * ${game.name} (${game.year}) [${game.platform}]`);
-    }
-
-    iterations--;
-    if (iterations === 0) {
-      requestStop();
-      searchInfo = info.gameList[0];
+      // console.log(` * ${game.name} (${game.year}) [${game.platform}]`);
+      queue.addItems(game);
     }
   }
-
-  const site = new Site();
 
   // tslint:disable-next-line:no-magic-numbers
   await discover({
     browser,
-    index: createIndexPage(site.indexStrategies.Year, '1981'),
+    index: createIndexPage(site.indexStrategies.Year, '1978'),
     onDiscover: onDiscoverCallback,
   });
-
-  console.log(JSON.stringify(searchInfo, null, 2));
-  const fullInfo = await site.getGameInfo(browser, searchInfo.pageUrl);
-  console.log(JSON.stringify(fullInfo, null, 2));
-  await site.downloadScreenshots(fullInfo);
-  await site.downloadGameLinks(fullInfo);
-
-  await browser.close();
 }
 
 run();
