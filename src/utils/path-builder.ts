@@ -5,7 +5,7 @@ import { getSettings } from './settings';
 export type Path = 'gameDownloads' | 'gameScreenshots' | 'gameInfo' | 'internalData';
 
 function safeValue(str: string): string {
-  return str.replace(/[\///|:<>*"]/g, '-');
+  return str.replace(/[\///|:<>*"?]/g, '-');
 }
 
 export function pathBuilder(path: Path, info: Partial<GameInfo> = {}): string {
