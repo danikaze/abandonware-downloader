@@ -44,6 +44,7 @@ export interface Link {
 }
 
 export interface GameInfo {
+  id?: number;
   pageUrl: string;
   updated?: number;
   name?: string;
