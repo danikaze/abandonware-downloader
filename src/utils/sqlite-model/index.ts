@@ -134,9 +134,36 @@ export class SqliteModel<Q extends string> {
           await this.createInternalTable();
           await this.createModelTables();
         }
-        await this.prepareStmt();
+        await this.prepareStmts();
 
         resolve();
+      });
+    });
+  }
+
+  /**
+   * Prepare the provided sql query as a promisify wrapper around Statement
+   */
+  protected prepareStmt(sql: string): Promise<SqliteStatement> {
+    return new Promise((resolve, reject) => {
+      this.db.prepare(sql, function prepared(error) {
+        if (error) {
+          getLogger().log('error', `Error preparing query ${sql} (${error.message})`);
+          reject(error);
+          return;
+        }
+
+        const stmt: SqliteStatement = {
+          bind: promisifyStatementResult<SqliteNoResult>(this, 'bind'),
+          reset: promisifyStatementResult<SqliteNoResult>(this, 'reset'),
+          finalize: promisifyStatementResult<SqliteNoResult>(this, 'finalize'),
+          run: promisifyStatementResult<SqliteNoResult>(this, 'run'),
+          get: promisifyStatementResult<SqliteSingleResult>(this, 'get', 'row'),
+          all: promisifyStatementResult<SqliteMultipleResult>(this, 'all', 'rows'),
+          each: promisifyStatementResult<SqliteSingleResult>(this, 'each', 'row'),
+        };
+
+        resolve(stmt);
       });
     });
   }
@@ -201,33 +228,14 @@ export class SqliteModel<Q extends string> {
   }
 
   /**
-   * Prepare the provided queries as a promisify wrapper around Statement
+   * Prepare all the model queries as a promisified queries in `this.stmt`
    */
-  private async prepareStmt(): Promise<void> {
+  private async prepareStmts(): Promise<void> {
     const { queries } = this.modelOptions;
-    const logger = this.logger;
     const stmt = this.stmt;
 
-    await asyncParallel(Object.keys(queries), (query) => new Promise((resolve, reject) => {
-      this.db.prepare(queries[query], function prepared(error) {
-        if (error) {
-          logger.log('error', `Error preparing query ${query} (${error.message})`);
-          reject(error);
-          return;
-        }
-
-        stmt[query] = {
-          bind: promisifyStatementResult<SqliteNoResult>(this, 'bind'),
-          reset: promisifyStatementResult<SqliteNoResult>(this, 'reset'),
-          finalize: promisifyStatementResult<SqliteNoResult>(this, 'finalize'),
-          run: promisifyStatementResult<SqliteNoResult>(this, 'run'),
-          get: promisifyStatementResult<SqliteSingleResult>(this, 'get', 'row'),
-          all: promisifyStatementResult<SqliteMultipleResult>(this, 'all', 'rows'),
-          each: promisifyStatementResult<SqliteSingleResult>(this, 'each', 'row'),
-        };
-
-        resolve();
-      });
-    }));
+    await asyncParallel(Object.keys(queries), async (query) => {
+      stmt[query] = await this.prepareStmt(queries[query]);
+    });
   }
 }
