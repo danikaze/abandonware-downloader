@@ -1,5 +1,5 @@
 import { SqliteModel, SqlModelOptions } from '../utils/sqlite-model';
-import { GameInfo } from '../interfaces';
+import { GameInfo, Platform } from '../interfaces';
 import { initSql, queriesSql } from './game-sql';
 import { getSettings } from '../utils/settings';
 import { join } from 'path';
@@ -19,6 +19,16 @@ type Query = 'insertGame'
            | 'insertLinkLang'
            | 'selectLinkLangs'
            ;
+
+export interface FilterOptions {
+  name?: string;
+  year?: number;
+  platform?: Platform;
+  limit?: number;
+  offset?: number;
+  orderBy?: Array<'name' | 'year' | 'score' | 'platform'>;
+  sortDesc?: boolean;
+}
 
 export class Game extends SqliteModel<Query> {
   constructor() {
@@ -212,5 +222,52 @@ export class Game extends SqliteModel<Query> {
   public async remove(id: number): Promise<void> {
     await this.isReady();
     await this.stmt.deleteGame.run(id);
+  }
+
+  /**
+   * Search in the database with the passed options and retrieve the information for all the matches
+   */
+  public async search(filter: FilterOptions): Promise<GameInfo[]> {
+    const sql = this.createFilterStmt(filter);
+    const stmt = await this.prepareStmt(sql);
+
+    return stmt.all().then((result) => result.rows);
+  }
+
+  /**
+   * Construct the SQL query to run from the filter parameters
+   */
+  private createFilterStmt(filter: FilterOptions): string {
+    const conditions = [];
+
+    if (filter.name) {
+      conditions.push(`name LIKE "%${filter.name}%"`);
+    }
+
+    if (filter.platform) {
+      conditions.push(`platform LIKE "%${filter.platform}%"`);
+    }
+
+    if (filter.year) {
+      conditions.push(`year = ${filter.year}`);
+    }
+
+    if (conditions.length === 0) {
+      return;
+    }
+
+    const sortOrder = filter.sortDesc ? ' DESC' : ' ASC';
+    const orderBy = filter.orderBy && filter.orderBy.length > 0
+      ? ` ORDER BY ${filter.orderBy.join(', ')} ${sortOrder}`
+      : ` ORDER BY id ${sortOrder}`
+      ;
+
+    const limit = ` LIMIT ${filter.limit ? filter.limit : -1} ${filter.offset ? `OFFSET ${filter.offset}` : ''}`;
+
+    return `SELECT * FROM games
+            WHERE ${conditions.join(' AND ')}
+            ${orderBy}
+            ${limit}
+            ;`;
   }
 }
