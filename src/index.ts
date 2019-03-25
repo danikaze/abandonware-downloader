@@ -7,6 +7,7 @@ import { Site } from './pages/my-abandonware-com/site';
 import { createIndexPage } from './pages/index-page';
 import { Queue } from './utils/queue';
 import { GameInfo } from './interfaces';
+import { Game } from './model/game';
 
 async function initApp(settingsFile: string) {
   const settings = loadSettings(settingsFile);
@@ -19,12 +20,14 @@ async function initApp(settingsFile: string) {
 async function run() {
   async function getFullGameInfo(site: Site, game: GameInfo, remaining: number): Promise<void> {
     console.log(` * ${game.name} (${game.year}) [${game.platform}] (${remaining} games remaining)`);
-    await site.getGameInfo(browser, game.pageUrl);
+    const fullInfo = await site.getGameInfo(browser, game.pageUrl);
+    await gameModel.set(fullInfo);
   }
 
   await initApp(getSettingsPath());
   const settings = getSettings();
 
+  const gameModel = new Game();
   const site = new Site();
   const browser = await launch({
     headless: !settings.debugCode,
