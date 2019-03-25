@@ -26,7 +26,6 @@ export class Game extends SqliteModel<Query> {
       dbPath: join(getSettings().internalDataPath, 'data.db'),
       createDbSql: [initSql],
       queries: queriesSql,
-      debug: true,
     };
 
     super(modelOptions);
