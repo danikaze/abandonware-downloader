@@ -1,12 +1,12 @@
 export interface QueueOptions<T> {
-  consumer(item: T, remaining: number): Promise<void>;
   threads?: number;
+  consumer(item: T, remaining: number): Promise<void>;
 }
 
 /**
  * Queue of items to be processed by arbitrary consumers
  */
-export class Queue<T = any> {
+export class Queue<T = any> { // tslint:disable-line:no-any
   protected readonly options: QueueOptions<T>;
   protected readonly items: T[] = [];
   private active: number = 0;
