@@ -19,6 +19,7 @@
     "build": "tsc",
     "dev": "tsc --watch --sourceMap",
     "start": "node app/index.js --config src/settings.json",
+    "start-brk": "node --inspect-brk app/index.js --config src/settings.json",
     "lint": "tslint -p tsconfig.json -c tslint.yaml",
     "clean": "rimraf app"
   },
