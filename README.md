@@ -1,5 +1,7 @@
 # abandonware downloader
 
+[![Build Status](https://travis-ci.org/danikaze/abandonware-downloader.svg?branch=master)](https://travis-ci.org/danikaze/abandonware-downloader)
+
 Small, personal project to play with [puppeteer](https://github.com/GoogleChrome/puppeteer/).
 
 It crawls webs with abandonware to download them.
