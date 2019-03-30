@@ -15,6 +15,7 @@
     "npm": "6.4.x"
   },
   "scripts": {
+    "test": "npm run lint",
     "build": "tsc",
     "dev": "tsc --watch --sourceMap",
     "start": "node app/index.js --config src/settings.json",
