@@ -259,8 +259,7 @@ export class Game extends SqliteModel<Query> {
     const sortOrder = filter.sortDesc ? ' DESC' : ' ASC';
     const orderBy = filter.orderBy && filter.orderBy.length > 0
       ? ` ORDER BY ${filter.orderBy.join(', ')} ${sortOrder}`
-      : ` ORDER BY id ${sortOrder}`
-      ;
+      : ` ORDER BY id ${sortOrder}`;
 
     const limit = ` LIMIT ${filter.limit ? filter.limit : -1} ${filter.offset ? `OFFSET ${filter.offset}` : ''}`;
 

@@ -1,4 +1,5 @@
 import { SqliteModel, SqlModelOptions } from '../utils/sqlite-model';
+import { SqliteStatement } from '../utils/sqlite-model/statement';
 
 export interface CacheOptions {
   /** where cached data will be stored */
@@ -16,7 +17,7 @@ export interface PurgedData {
   removedFiles: number;
 }
 
-type Query = 'set' | 'update' | 'get' | 'remove' | 'purge';
+type Query = 'set' | 'update' | 'get' | 'remove' | 'purge' | 'allKeys' | 'validKeys' | 'expiredKeys';
 
 export class Cache extends SqliteModel<Query> {
   private static readonly initSql = `
@@ -32,6 +33,9 @@ export class Cache extends SqliteModel<Query> {
     get: 'SELECT value FROM cache WHERE key = ? AND expireson >= ?;',
     remove: 'DELETE FROM cache WHERE key = ?',
     purge: 'DELETE FROM cache WHERE expireson < ?',
+    allKeys: 'SELECT key FROM cache',
+    validKeys: 'SELECT key FROM cache WHERE expireson >= ?',
+    expiredKeys: 'SELECT key FROM cache WHERE expireson < ?',
   };
   protected readonly options: CacheOptions;
 
@@ -104,5 +108,16 @@ export class Cache extends SqliteModel<Query> {
     } catch (error) {
       this.logger.log('error', `cache.purge() [${error}]`);
     }
+  }
+
+  public async keys(filter: 'all' | 'valid' | 'expired' = 'all'): Promise<string[]> {
+    await this.isReady();
+
+    const stmt = this.stmt[`${filter}Keys`] as SqliteStatement;
+    const param = filter === 'all' ? undefined : new Date().getTime();
+
+    return stmt.all(param).then((result) => {
+      return result.rows.map((row) => row.key);
+    });
   }
 }

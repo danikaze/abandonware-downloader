@@ -116,32 +116,6 @@ export class SqliteModel<Q extends string> {
   }
 
   /**
-   *
-   */
-  private openDb(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      const { dbPath } = this.modelOptions;
-      mkdirp(dirname(dbPath));
-
-      this.db = new sqlite3.Database(dbPath, async (error) => {
-        if (error) {
-          this.logger.log('error', `sqlite: error opening the database ${JSON.stringify(error, null, 2)}`);
-          reject(error);
-          return;
-        }
-
-        if (await this.isNew()) {
-          await this.createInternalTable();
-          await this.createModelTables();
-        }
-        await this.prepareStmts();
-
-        resolve();
-      });
-    });
-  }
-
-  /**
    * Prepare the provided sql query as a promisify wrapper around Statement
    */
   protected prepareStmt(sql: string): Promise<SqliteStatement> {
@@ -164,6 +138,32 @@ export class SqliteModel<Q extends string> {
         };
 
         resolve(stmt);
+      });
+    });
+  }
+
+  /**
+   *
+   */
+  private openDb(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const { dbPath } = this.modelOptions;
+      mkdirp(dirname(dbPath));
+
+      this.db = new sqlite3.Database(dbPath, async (error) => {
+        if (error) {
+          this.logger.log('error', `sqlite: error opening the database ${JSON.stringify(error, null, 2)}`);
+          reject(error);
+          return;
+        }
+
+        if (await this.isNew()) {
+          await this.createInternalTable();
+          await this.createModelTables();
+        }
+        await this.prepareStmts();
+
+        resolve();
       });
     });
   }
