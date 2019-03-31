@@ -3,7 +3,7 @@ import { Dict, GameInfo, Link, Platform, Download } from '../../interfaces';
 import { asyncParallel } from '../../utils/async-parallel';
 import { getLogger } from '../../utils/logger';
 import { toCamelCase } from '../../utils/to-camel-case';
-import { getSettings } from '../../utils/settings';
+import { getBrowserNewPage } from '../../utils/get-browser-new-page';
 
 /**
  * Get the game name from the title
@@ -284,13 +284,7 @@ export async function getGameInfo(browser: Browser, url: string): Promise<GameIn
   const logger = getLogger();
   logger.log('info', `getGameInfo(${url})`);
 
-  const page = await browser.newPage();
-  if (getSettings().debugCode) {
-    await page.setViewport({
-      width: 960,
-      height: 1700,
-    });
-  }
+  const page = await getBrowserNewPage(browser);
   await page.goto(url);
 
   const info: GameInfo = {

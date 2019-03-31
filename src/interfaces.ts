@@ -1,4 +1,5 @@
 import { FileTransportOptions } from 'winston/lib/winston/transports';
+import { Viewport } from 'puppeteer';
 
 export type Dict<T> = { [key: string]: T };
 
@@ -103,6 +104,8 @@ export interface Settings {
   cacheGameInfoTtl: number;
   /** `true` to open DevTools */
   debugCode?: boolean;
+  /** if set and `debugCode` is `true`, new pages will use it */
+  debugViewport?: Viewport;
   /** List of log interfaces */
   log?: LogSettings[];
 }

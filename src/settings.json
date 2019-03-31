@@ -5,6 +5,10 @@
   "gameInfoPath": "[app]/../downloads/[platform]/[name]/info.json",
   "internalDataPath": "[app]/../.abandonware-dl",
   "debugCode": false,
+  "debugViewport": {
+    "width": 960,
+    "height": 1700
+  },
   "log": [{
     "level": "debug",
     "colors": true
