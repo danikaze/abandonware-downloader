@@ -60,6 +60,16 @@ export interface GameInfo {
   howTo?: string;
 }
 
+export interface FilterOptions {
+  name?: string;
+  year?: number;
+  platform?: Platform;
+  limit?: number;
+  offset?: number;
+  orderBy?: Array<'name' | 'year' | 'score' | 'platform'>;
+  sortDesc?: boolean;
+}
+
 export type LogLevel = 'crit'     // critical error, app closing
                      | 'error'    // error, but the app can work
                      | 'warn'     // something weird happened

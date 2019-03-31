@@ -1,5 +1,5 @@
 import { SqliteModel, SqlModelOptions } from '../utils/sqlite-model';
-import { GameInfo, Platform } from '../interfaces';
+import { GameInfo, FilterOptions } from '../interfaces';
 import { initSql, queriesSql } from './game-sql';
 import { getSettings } from '../utils/settings';
 import { join } from 'path';
@@ -19,16 +19,6 @@ type Query = 'insertGame'
            | 'insertLinkLang'
            | 'selectLinkLangs'
            ;
-
-export interface FilterOptions {
-  name?: string;
-  year?: number;
-  platform?: Platform;
-  limit?: number;
-  offset?: number;
-  orderBy?: Array<'name' | 'year' | 'score' | 'platform'>;
-  sortDesc?: boolean;
-}
 
 export class Game extends SqliteModel<Query> {
   constructor() {
