@@ -28,13 +28,17 @@ export interface DiscoverInfo {
   availablePages: number;
   startPage: number;
   currentPage: number;
-  startCategory: string;
-  currentCategory: string;
+  startCategory?: string;
+  currentCategory?: string;
   gameList: GameInfo[];
 }
 
+// tslint:disable-next-line:no-any
+function hasCategories(o: any): o is { getCategory(): string } {
+  return typeof o.getCategory === 'function';
+}
+
 export async function discover(options: DiscoverOptions): Promise<DiscoverInfo> {
-  return new Promise(async (resolve) => {
     const opt: DiscoverOptions = { ...defaultOptions, ...options };
     let stopRequested = false;
 
@@ -50,8 +54,8 @@ export async function discover(options: DiscoverOptions): Promise<DiscoverInfo> 
 
     const browser = opt.browser ? opt.browser : await launch(opt.browserLaunchOptions);
     const startPage = index.getPage();
-    const startCategory = index.getCategory();
-    const availablePages = await index.getNumberOfPages(browser);
+  const startCategory = hasCategories(index) && index.getCategory();
+  const availablePages = await index.getNumberOfPages(browser) || 0;
 
     const info: DiscoverInfo = {
       initialUrl,
@@ -68,7 +72,7 @@ export async function discover(options: DiscoverOptions): Promise<DiscoverInfo> 
       `discover pages: ${info.currentPage}/${info.availablePages}`,
     );
 
-    while (info.currentCategory) {
+  for (;;) {
       while (info.currentPage <= info.availablePages) {
         info.gameList.push.apply(info.gameList, await index.getLinks(browser));
         if (opt.onDiscover) {
@@ -87,16 +91,19 @@ export async function discover(options: DiscoverOptions): Promise<DiscoverInfo> 
         break;
       }
 
+    if (!hasCategories(index)) {
+      break;
+    }
+
       index.nextCategory();
+    info.currentCategory = index.getCategory();
       info.availablePages = await index.getNumberOfPages(browser);
       info.currentPage = index.getPage();
-      info.currentCategory = index.getCategory();
     }
 
     if (!opt.browser) {
       await browser.close();
     }
 
-    resolve(info);
-  });
+  return info;
 }
