@@ -12,5 +12,7 @@
   "log": [{
     "level": "debug",
     "colors": true
-  }]
+  }],
+  "cacheIndexTtl": 2592000,
+  "cacheGameInfoTtl": 2592000
 }
