@@ -3,6 +3,7 @@ import { Dict, GameInfo, Link, Platform, Download } from '../../interfaces';
 import { asyncParallel } from '../../utils/async-parallel';
 import { getLogger } from '../../utils/logger';
 import { toCamelCase } from '../../utils/to-camel-case';
+import { getBrowserNewPage } from '../../utils/get-browser-new-page';
 
 /**
  * Get the game name from the title
@@ -192,7 +193,10 @@ async function getDownloadLinks(page: Page, info: GameInfo): Promise<void> {
 
             const imgs = Array.from(child.querySelectorAll('span img')) as HTMLImageElement[];
             if (imgs.length > 0) {
-              link.languages = imgs.length > 0 ? imgs.map((img) => /([^/.]+)\.gif$/.exec(img.src)[1]) : undefined;
+              link.languages = imgs.length > 0 ? imgs.map((img) => {
+                const match = /([^/.]+)\.(gif|png|jpg|jpeg)$/.exec(img.src);
+                return match && match[1];
+              }) : undefined;
             }
 
             const spans = Array.from(child.querySelectorAll('span')) as HTMLSpanElement[];
@@ -272,6 +276,7 @@ async function getDownloadLinks(page: Page, info: GameInfo): Promise<void> {
   } catch (e) {
     const logger = getLogger();
     logger.log('warn', `getDownloadLinks not available for ${info.pageUrl}`);
+    info.downloadLinks = [];
   }
 }
 
@@ -279,7 +284,7 @@ export async function getGameInfo(browser: Browser, url: string): Promise<GameIn
   const logger = getLogger();
   logger.log('info', `getGameInfo(${url})`);
 
-  const page = await browser.newPage();
+  const page = await getBrowserNewPage(browser);
   await page.goto(url);
 
   const info: GameInfo = {

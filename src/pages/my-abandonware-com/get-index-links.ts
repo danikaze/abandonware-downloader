@@ -1,6 +1,7 @@
 import { Browser } from 'puppeteer';
 import { getLogger } from '../../utils/logger';
 import { GameInfo } from '../../interfaces';
+import { getBrowserNewPage } from '../../utils/get-browser-new-page';
 
 /**
  * Get short information of game pages from the index
@@ -12,7 +13,7 @@ export async function getIndexLinks(browser: Browser, url: string): Promise<Game
   const logger = getLogger();
   logger.log('info', `getIndexLinks(${url})`);
 
-  const page = await browser.newPage();
+  const page = await getBrowserNewPage(browser);
   await page.goto(url);
   const gameList = await page.$$eval(
     '.itemListGame',
@@ -43,7 +44,7 @@ export async function getNumberOfIndexPages(browser: Browser, baseUrl: string): 
   const logger = getLogger();
   logger.log('info', `getNumberOfIndexPages(${baseUrl})`);
 
-  const page = await browser.newPage();
+  const page = await getBrowserNewPage(browser);
   let nPages: number;
 
   try {

@@ -1,4 +1,5 @@
 import { FileTransportOptions } from 'winston/lib/winston/transports';
+import { Viewport } from 'puppeteer';
 
 export type Dict<T> = { [key: string]: T };
 
@@ -60,6 +61,16 @@ export interface GameInfo {
   howTo?: string;
 }
 
+export interface FilterOptions {
+  name?: string;
+  year?: number;
+  platform?: Platform;
+  limit?: number;
+  offset?: number;
+  orderBy?: Array<'name' | 'year' | 'score' | 'platform'>;
+  sortDesc?: boolean;
+}
+
 export type LogLevel = 'crit'     // critical error, app closing
                      | 'error'    // error, but the app can work
                      | 'warn'     // something weird happened
@@ -93,6 +104,8 @@ export interface Settings {
   cacheGameInfoTtl: number;
   /** `true` to open DevTools */
   debugCode?: boolean;
+  /** if set and `debugCode` is `true`, new pages will use it */
+  debugViewport?: Viewport;
   /** List of log interfaces */
   log?: LogSettings[];
 }

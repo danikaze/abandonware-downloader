@@ -2,10 +2,11 @@ import { Browser, LaunchOptions, launch } from 'puppeteer';
 import { GameInfo } from './interfaces';
 import { getLogger } from './utils/logger';
 import { IndexPage } from './pages/index-page';
+import { SearchIndexPage } from './pages/search-index-page';
 
 export interface DiscoverOptions {
   /** Strategy to discover */
-  index: IndexPage;
+  index: IndexPage | SearchIndexPage;
   /** If `true`, it will enter each game page to retrieve more detailed information */
   gameDetails?: boolean;
   /**
@@ -28,75 +29,82 @@ export interface DiscoverInfo {
   availablePages: number;
   startPage: number;
   currentPage: number;
-  startCategory: string;
-  currentCategory: string;
+  startCategory?: string;
+  currentCategory?: string;
   gameList: GameInfo[];
 }
 
+// tslint:disable-next-line:no-any
+function hasCategories(o: any): o is { getCategory(): string } {
+  return typeof o.getCategory === 'function';
+}
+
 export async function discover(options: DiscoverOptions): Promise<DiscoverInfo> {
-  return new Promise(async (resolve) => {
-    const opt: DiscoverOptions = { ...defaultOptions, ...options };
-    let stopRequested = false;
+  const opt: DiscoverOptions = { ...defaultOptions, ...options };
+  let stopRequested = false;
 
-    function requestStop() {
-      stopRequested = true;
-    }
+  function requestStop() {
+    stopRequested = true;
+  }
 
-    const index = opt.index;
+  const index = opt.index;
 
-    const logger = getLogger();
-    const initialUrl = index.getUrl();
-    logger.log('info', `discover(${initialUrl})`);
+  const logger = getLogger();
+  const initialUrl = index.getUrl();
+  logger.log('info', `discover(${initialUrl})`);
 
-    const browser = opt.browser ? opt.browser : await launch(opt.browserLaunchOptions);
-    const startPage = index.getPage();
-    const startCategory = index.getCategory();
-    const availablePages = await index.getNumberOfPages(browser);
+  const browser = opt.browser ? opt.browser : await launch(opt.browserLaunchOptions);
+  const startPage = index.getPage();
+  const startCategory = hasCategories(index) && index.getCategory();
+  const availablePages = await index.getNumberOfPages(browser) || 0;
 
-    const info: DiscoverInfo = {
-      initialUrl,
-      availablePages,
-      startPage,
-      startCategory,
-      currentPage: startPage,
-      currentCategory: startCategory,
-      gameList: [],
-    };
+  const info: DiscoverInfo = {
+    initialUrl,
+    availablePages,
+    startPage,
+    startCategory,
+    currentPage: startPage,
+    currentCategory: startCategory,
+    gameList: [],
+  };
 
-    logger.log(
-      'debug',
-      `discover pages: ${info.currentPage}/${info.availablePages}`,
-    );
+  logger.log(
+    'debug',
+    `discover pages: ${info.currentPage}/${info.availablePages}`,
+  );
 
-    while (info.currentCategory) {
-      while (info.currentPage <= info.availablePages) {
-        info.gameList.push.apply(info.gameList, await index.getLinks(browser));
-        if (opt.onDiscover) {
-          await opt.onDiscover({ ...info }, requestStop);
-        }
-
-        if (stopRequested) {
-          break;
-        }
-
-        index.nextPage();
-        info.currentPage = index.getPage();
+  for (;;) {
+    while (info.currentPage <= info.availablePages) {
+      info.gameList.push.apply(info.gameList, await index.getLinks(browser));
+      if (opt.onDiscover) {
+        await opt.onDiscover({ ...info }, requestStop);
       }
 
       if (stopRequested) {
         break;
       }
 
-      index.nextCategory();
-      info.availablePages = await index.getNumberOfPages(browser);
+      index.nextPage();
       info.currentPage = index.getPage();
-      info.currentCategory = index.getCategory();
     }
 
-    if (!opt.browser) {
-      await browser.close();
+    if (stopRequested) {
+      break;
     }
 
-    resolve(info);
-  });
+    if (!hasCategories(index)) {
+      break;
+    }
+
+    index.nextCategory();
+    info.currentCategory = index.getCategory();
+    info.availablePages = await index.getNumberOfPages(browser);
+    info.currentPage = index.getPage();
+  }
+
+  if (!opt.browser) {
+    await browser.close();
+  }
+
+  return info;
 }

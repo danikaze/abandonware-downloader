@@ -66,12 +66,20 @@ async function run() {
     consumer: getFullGameInfo.bind(null, site),
   });
 
+  site.searchIndexStrategy.setFilter({
+    name: 'ninja',
+  });
+
   // tslint:disable-next-line:no-magic-numbers
   await discover({
     browser,
-    index: createIndexPage(site.indexStrategies.Year, '1978'),
+    // index: createIndexPage(site.indexStrategies.Year, '1978'),
+    index: site.searchIndexStrategy,
     onDiscover: onDiscoverCallback,
   });
+
+  await browser.close();
+  console.log('Ending...');
 }
 
 run();
