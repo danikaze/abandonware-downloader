@@ -98,8 +98,16 @@ export async function discover(options: DiscoverOptions): Promise<DiscoverInfo> 
 
     index.nextCategory();
     info.currentCategory = index.getCategory();
+    if (!info.currentCategory) {
+      break;
+    }
+
     info.availablePages = await index.getNumberOfPages(browser);
     info.currentPage = index.getPage();
+
+    if (!info.currentPage) {
+      break;
+    }
   }
 
   if (!opt.browser) {
