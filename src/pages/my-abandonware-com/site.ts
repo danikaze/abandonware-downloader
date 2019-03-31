@@ -5,6 +5,7 @@ import { getIndexPageClass } from './get-index-page-class';
 import { NAME_INITIALS, YEARS, PLATFORMS, GENRES } from './constants';
 import { getGameInfo } from './get-game-info';
 import { Browser } from 'puppeteer';
+import { SearchIndex } from './search';
 
 export const IndexName = getIndexPageClass('Name', 'name', NAME_INITIALS);
 export const IndexYear = getIndexPageClass('Year', 'year', YEARS);
@@ -19,6 +20,7 @@ export class Site extends SiteStrategies {
     Platform: IndexPlatform,
     Genre: IndexGenre,
   };
+  public readonly searchIndexStrategy = new SearchIndex();
 
   protected readonly needsCookiesForGameScreenshots = false;
   protected readonly needsCookiesForGameLinks = true;

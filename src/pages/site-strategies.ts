@@ -8,6 +8,7 @@ import { pathBuilder } from '../utils/path-builder';
 import { getCookies, downloadStatic } from '../utils/download';
 import { BaseIndexPage, IndexPageConstructor } from './index-page';
 import { CoreOptions } from 'request';
+import { SearchIndexPage } from './search-index-page';
 
 export interface IndexStrategy {
   strategies: string[];
@@ -28,6 +29,7 @@ export interface DownloadOptions {
 export abstract class SiteStrategies {
   public abstract readonly name: string;
   public abstract readonly indexStrategies: Dict<IndexPageConstructor>;
+  public abstract readonly searchIndexStrategy: SearchIndexPage;
   protected abstract readonly needsCookiesForGameScreenshots: boolean;
   protected abstract readonly needsCookiesForGameLinks: boolean;
 
