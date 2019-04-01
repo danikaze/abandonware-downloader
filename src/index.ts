@@ -1,13 +1,13 @@
 // tslint:disable: no-console
-import { launch } from 'puppeteer';
+import { launch, Browser } from 'puppeteer';
 import { loadSettings, getSettingsPath, getSettings } from './utils/settings';
 import { getLogger, initLogger } from './utils/logger';
 import { discover, DiscoverInfo } from './discover';
 import { Site } from './pages/my-abandonware-com/site';
-import { createIndexPage } from './pages/index-page';
 import { Queue } from './utils/queue';
 import { GameInfo } from './interfaces';
 import { Game } from './model/game';
+import { start } from './ui';
 
 let stopDiscover = false;
 
@@ -23,7 +23,9 @@ async function run() {
   function exitHandler(signal: string) {
     console.log(`Caught interrupt signal (${signal}). Finishing open processes...`);
     stopDiscover = true;
-    queue.stop();
+    if (queue) {
+      queue.stop();
+    }
   }
 
   async function getFullGameInfo(site: Site, game: GameInfo, remaining: number): Promise<void> {
@@ -52,33 +54,52 @@ async function run() {
 
   await initApp(getSettingsPath());
   const settings = getSettings();
-
   const gameModel = new Game();
-  const site = new Site();
-  const browser = await launch({
-    headless: !settings.debugCode,
-    devtools: settings.debugCode,
-  });
-
+  const appPromises: Promise<void>[] = [];
   let shownGames = 0;
-  const queue = new Queue<GameInfo>({
-    threads: 5,
-    consumer: getFullGameInfo.bind(null, site),
-  });
+  let queue: Queue<GameInfo>;
+  let site: Site;
+  let browser: Browser;
 
-  site.searchIndexStrategy.setFilter({
-    name: 'ninja',
-  });
+  const appFeats = {
+    discover: false,
+    ui: true,
+  };
 
-  // tslint:disable-next-line:no-magic-numbers
-  await discover({
-    browser,
-    // index: createIndexPage(site.indexStrategies.Year, '1978'),
-    index: site.searchIndexStrategy,
-    onDiscover: onDiscoverCallback,
-  });
+  if (appFeats.discover) {
+    appPromises.push(new Promise(async () => {
+      site = new Site();
+      browser = await launch({
+        headless: !settings.debugCode,
+        devtools: settings.debugCode,
+      });
 
-  await browser.close();
+      queue = new Queue<GameInfo>({
+        threads: 5,
+        consumer: getFullGameInfo.bind(null, site),
+      });
+
+      site.searchIndexStrategy.setFilter({
+        name: 'ninja',
+      });
+
+      // tslint:disable-next-line:no-magic-numbers
+      await discover({
+        browser,
+        // index: createIndexPage(site.indexStrategies.Year, '1978'),
+        index: site.searchIndexStrategy,
+        onDiscover: onDiscoverCallback,
+      });
+
+      await browser.close();
+    }));
+  }
+
+  if (appFeats.ui) {
+    appPromises.push(start());
+  }
+
+  await Promise.all(appPromises);
   console.log('Ending...');
 }
 
