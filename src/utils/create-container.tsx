@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import { Dispatch, Action } from 'redux';
 
 export interface ContainerConfig<State, StateProps, DispatchProps = undefined, OwnProps = {}> {
-  component: React.ComponentType;
+  component:((props: StateProps) => JSX.Element) | React.ComponentType<StateProps>;
   mapDispatchToProps?: (dispatch: Dispatch<Action<string>>, ownProps?: OwnProps) => DispatchProps;
   mapStateToProps?: (state: State, ownProps?: OwnProps) => StateProps;
   /** If defined, `init` would be triggered once, when creating the component */
@@ -21,8 +21,7 @@ export function createContainer<State, StateProps, DispatchProps, OwnProps>(
   function mapStateToPropsWrapper(state) {
     initialState = state;
     const props = config.mapStateToProps.apply(config, arguments);
-    const result = props ? { ...props } : {};
-    return result;
+    return props ? props : {};
   }
 
   function mapDispatchToPropsWrapper() {
@@ -31,8 +30,8 @@ export function createContainer<State, StateProps, DispatchProps, OwnProps>(
   }
 
   function mergeProps(stateProps, dispatchProps, ownProps) {
-    // call loadData if defined, only when creating the component (only in browser side)
-    if (config.init && (typeof window !== 'undefined') && dispatch) {
+    // call loadData if defined, only when creating the component
+    if (config.init && dispatch) {
       config.init(dispatch, stateProps, initialState, ownProps);
       // clear references, to avoid memory leaks
       initialState = null;
