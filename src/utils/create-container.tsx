@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import { Dispatch, Action } from 'redux';
 
 export interface ContainerConfig<State, StateProps, DispatchProps = undefined, OwnProps = {}> {
-  component:((props: StateProps) => JSX.Element) | React.ComponentType<StateProps>;
+  component: ((props: StateProps) => JSX.Element) | React.ComponentType<StateProps>;
   mapDispatchToProps?: (dispatch: Dispatch<Action<string>>, ownProps?: OwnProps) => DispatchProps;
   mapStateToProps?: (state: State, ownProps?: OwnProps) => StateProps;
   /** If defined, `init` would be triggered once, when creating the component */
