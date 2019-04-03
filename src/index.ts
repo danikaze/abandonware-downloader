@@ -100,7 +100,6 @@ async function run() {
   }
 
   await Promise.all(appPromises);
-  console.log('Ending...');
 }
 
 run();

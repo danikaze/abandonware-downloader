@@ -11,11 +11,17 @@ import { initializeStore } from './store';
  */
 export function start(): Promise<void> {
   const store = initializeStore();
-  const { waitUntilExit } = render(
+  const { waitUntilExit, unmount } = render(
     <Provider store={store}>
       <App />
     </Provider>
   );
+
+  store.subscribe(() => {
+    if (store.getState().exit) {
+      unmount();
+    }
+  });
 
   return waitUntilExit();
 }
