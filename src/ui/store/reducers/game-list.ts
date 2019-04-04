@@ -1,21 +1,24 @@
 import { Action } from '../actions';
-import { GameListState } from '../model';
+import { State, GameListState } from '../model';
+import { clamp } from '../../../utils/clamp';
 
-export function gameListReducer(state: GameListState, action: Action) {
+export function gameListReducer(state: State, action: Action): GameListState {
+  const gameListState = state.ui.gameList;
+
   switch (action.type) {
     case 'moveFocusedGame':
       return {
-        ...state,
-        focused: state.focused + action.delta,
+        ...gameListState,
+        focused: clamp(gameListState.focused + action.delta, 0, state.data.games.length - 1),
       };
 
     case 'selectFocusedGame':
       return {
-        ...state,
-        selected: state.focused,
+        ...gameListState,
+        selected: gameListState.focused,
       };
 
     default:
-      return state;
+      return gameListState;
   }
 }

@@ -4,7 +4,7 @@ import { createContainer, ContainerConfig } from '../../utils/create-container';
 import { MainApp, StateProps } from '../components/main-app';
 import { State } from '../store/model';
 import { resizeWindow, exit } from '../store/actions/window';
-import { KeyData, InputHandler, keyHandler } from '../store/input';
+import { InputHandler, keyHandler } from '../store/input';
 import { gameListKeyHandler } from '../store/input/game-list';
 
 function init(dispatch: DispatchType): void {
@@ -14,19 +14,19 @@ function init(dispatch: DispatchType): void {
 
   const { stdin } = process;
 
-  const rl = readline.createInterface(stdin)
+  const rl = readline.createInterface(stdin);
   readline.emitKeypressEvents(stdin);
   if (stdin.isTTY) {
     stdin.setRawMode(true);
   }
 
-  const exitHandler: InputHandler = (dispatch: DispatchType, key: KeyData) => {
-    if (key.name === 'c' && key.ctrl) {
+  const exitHandler: InputHandler = (dispatch, key) => {
+    if (key.name === 'escape' || (key.name === 'c' && key.ctrl)) {
       rl.close();
       dispatch(exit());
       return true;
     }
-  }
+  };
 
   stdin.on('keypress', keyHandler(
     dispatch,
