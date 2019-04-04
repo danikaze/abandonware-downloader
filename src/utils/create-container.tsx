@@ -16,7 +16,7 @@ export function createContainer<State, StateProps, DispatchProps, OwnProps>(
   /** reference to dispatch function */
   let dispatch: Dispatch<Action<string>>;
   /** reference to the state at the moment of creating the component */
-  let initialState;
+  let initialState: State;
 
   function mapStateToPropsWrapper(state) {
     initialState = state;

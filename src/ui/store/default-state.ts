@@ -13,6 +13,9 @@ export const defaultState: State = {
       focused: 0,
       columns: ['name', 'year', 'platform'],
     },
+    filter: {
+      text: '',
+    },
   },
   data: {
     // test data, to be retrieved from the Model

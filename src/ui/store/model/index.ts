@@ -8,12 +8,17 @@ export interface GameListState {
   columns: string[];
 }
 
+export interface FilterState {
+  text: string;
+}
+
 export interface State {
   exit: boolean;
   ui: {
     width: number;
     height: number;
     gameList: GameListState;
+    filter: FilterState;
   };
   data: {
     games: GameInfo[];

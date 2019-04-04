@@ -3,6 +3,7 @@ import { Box } from 'ink';
 import { AppTitle } from './app-title';
 import { Footer } from './footer';
 import { GameList } from '../containers/game-list';
+import { Filter } from '../containers/filter';
 
 export interface StateProps {
   empty: boolean;
@@ -23,7 +24,11 @@ export function MainApp(props: StateProps) {
         abandonware-dl
       </AppTitle>
 
-      <Box width='100%'>
+      <Box flexDirection='column' width='100%'>
+        <Box margin={1}>
+          <Filter />
+        </Box>
+
         <Box height={APP_HEIGHT}>
             <GameList />
         </Box>
