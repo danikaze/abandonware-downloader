@@ -24,6 +24,12 @@ export function createContainer<State, StateProps, DispatchProps, OwnProps>(
     return props ? props : {};
   }
 
+  function mapStateToPropsWithOwnPropsWrapper(state, ownProps) {
+    initialState = state;
+    const props = config.mapStateToProps.apply(config, arguments);
+    return props ? props : {};
+  }
+
   function mapDispatchToPropsWrapper() {
     dispatch = arguments[0];
     return config.mapDispatchToProps && config.mapDispatchToProps.apply(config, arguments) || {};
@@ -42,9 +48,15 @@ export function createContainer<State, StateProps, DispatchProps, OwnProps>(
     return { ...stateProps, ...dispatchProps };
   }
 
+  let ms2p;
+  const mapStateToProps = config.mapStateToProps;
+  if (mapStateToProps) {
+    ms2p = mapStateToProps.length > 1 ? mapStateToPropsWithOwnPropsWrapper : mapStateToPropsWrapper;
+  }
+
   // Apply connect container
   const component = connect(
-    config.mapStateToProps && mapStateToPropsWrapper,
+    ms2p,
     mapDispatchToPropsWrapper,
     mergeProps,
   )((props) => {
