@@ -74,6 +74,10 @@ export class FlexTable<T> extends React.Component<StateProps<T>> {
     const HeaderComponent = this.props.headerComponent;
     const marginX = this.props.cellMargin;
 
+    if (!keys) {
+      return null;
+    }
+
     const renderDataCell = (key: string, value: string, column: number) => (
       <Box key={key} textWrap='truncate-end' flexBasis='100%' marginX={marginX}>
         <HeaderComponent key={key} column={column}>{value}</HeaderComponent>
@@ -102,7 +106,7 @@ export class FlexTable<T> extends React.Component<StateProps<T>> {
   private getHeaderKeys(): string[] {
     const { data, headerOrder, headerIfEmpty } = this.props;
 
-    if (data.length === 0 && !headerIfEmpty) {
+    if (data.length === 0 && (!headerIfEmpty || !headerOrder)) {
       return;
     }
 

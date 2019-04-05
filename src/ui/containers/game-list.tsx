@@ -36,6 +36,7 @@ function mapStateToProps(state: State): StateProps<GameListInfo> {
       platform: game.platform,
     })),
     headerOrder: gameList.columns,
+    headerIfEmpty: true,
     cellComponent: Cell,
   };
 }
