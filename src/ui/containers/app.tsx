@@ -7,7 +7,7 @@ import { resizeWindow, exit } from '../store/actions/window';
 import { InputHandler, keyHandler } from '../store/input';
 import { gameListKeyHandler } from '../store/input/game-list';
 import { Game } from '../../model/game';
-import { updateGames } from '../store/actions/data';
+import { updateGames } from '../store/actions/game-list';
 
 export interface OwnProps {
   gameModel: Game;

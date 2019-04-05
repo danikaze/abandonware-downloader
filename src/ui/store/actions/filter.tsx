@@ -1,8 +1,8 @@
 import { Action } from 'redux';
 import { ThunkAction } from 'redux-thunk';
-import { State } from '../model';
 import { Game } from '../../../model/game';
-import { updateGames, UpdateGameListAction } from './data';
+import { State } from '../model';
+import { UpdateGameList, updateGames } from './game-list';
 
 export type FilterAction = UpdateFilterText;
 
@@ -11,7 +11,7 @@ export interface UpdateFilterText extends Action {
   text: string;
 }
 
-type ThunkType = ThunkAction<Promise<void>, State, null, UpdateFilterText | UpdateGameListAction>;
+type ThunkType = ThunkAction<Promise<void>, State, null, UpdateFilterText | UpdateGameList>;
 
 export function updateFilterText(text: string, model: Game): ThunkType {
   return (dispatch, getState) => {

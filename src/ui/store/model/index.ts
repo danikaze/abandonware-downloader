@@ -6,6 +6,7 @@ export interface GameListState {
   selected: number;
   focused: number;
   columns: string[];
+  games: GameInfo[];
 }
 
 export interface FilterState {
@@ -16,10 +17,6 @@ export interface FilterState {
   sortDesc?: boolean;
 }
 
-export interface DataState {
-  games: GameInfo[];
-}
-
 export interface State {
   exit: boolean;
   ui: {
@@ -28,5 +25,4 @@ export interface State {
     gameList: GameListState;
     filter: FilterState;
   };
-  data: DataState;
 }

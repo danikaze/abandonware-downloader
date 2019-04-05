@@ -13,7 +13,6 @@ interface GameListInfo {
 
 function mapStateToProps(state: State): StateProps<GameListInfo> {
   const { gameList } = state.ui;
-  const { games } = state.data;
 
   function Cell({ children, row }: CellProps) {
     if (row === gameList.selected && row === gameList.focused) {
@@ -29,7 +28,7 @@ function mapStateToProps(state: State): StateProps<GameListInfo> {
   }
 
   return {
-    data: games.map((game) => ({
+    data: gameList.games.map((game) => ({
       key: game.id,
       year: game.year,
       name: game.name,

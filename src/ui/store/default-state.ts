@@ -11,6 +11,7 @@ export const defaultState: State = {
       selected: 1,
       focused: 0,
       columns: ['name', 'year', 'platform'],
+      games: [],
     },
     filter: {
       text: '',
@@ -19,8 +20,5 @@ export const defaultState: State = {
       orderBy: ['name'],
       sortDesc: false,
     },
-  },
-  data: {
-    games: [],
   },
 };

@@ -9,7 +9,7 @@ export function gameListReducer(state: State, action: Action): GameListState {
     case 'moveFocusedGame':
       return {
         ...gameListState,
-        focused: clamp(gameListState.focused + action.delta, 0, state.data.games.length - 1),
+        focused: clamp(gameListState.focused + action.delta, 0, gameListState.games.length - 1),
       };
 
     case 'selectFocusedGame':
@@ -17,6 +17,13 @@ export function gameListReducer(state: State, action: Action): GameListState {
         ...gameListState,
         selected: gameListState.focused,
       };
+
+    case 'updateGames': {
+      return {
+        ...gameListState,
+        games: action.games,
+      };
+    }
 
     default:
       return gameListState;
