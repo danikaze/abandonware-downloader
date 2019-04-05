@@ -6,8 +6,14 @@ import { State } from '../store/model';
 import { resizeWindow, exit } from '../store/actions/window';
 import { InputHandler, keyHandler } from '../store/input';
 import { gameListKeyHandler } from '../store/input/game-list';
+import { Game } from '../../model/game';
+import { updateGames } from '../store/actions/data';
 
-function init(dispatch: DispatchType): void {
+export interface OwnProps {
+  gameModel: Game;
+}
+
+function init(dispatch: DispatchType, stateProps: StateProps, state: State, ownProps: OwnProps): void {
   process.stdout.on('resize', () => {
     dispatch(resizeWindow());
   });
@@ -35,17 +41,29 @@ function init(dispatch: DispatchType): void {
       gameListKeyHandler,
     ],
   ));
+
+  const filter = state.ui.filter;
+  ownProps.gameModel.search({
+    name: filter.text,
+    limit: filter.limit,
+    offset: filter.offset,
+    orderBy: filter.orderBy,
+    sortDesc: filter.sortDesc,
+  }).then((games) => {
+    dispatch(updateGames(games));
+  });
 }
 
-function mapStateToProps(state: State): StateProps {
+function mapStateToProps(state: State, ownProps: OwnProps): StateProps {
   return {
     empty: state.exit,
     width: state.ui.width,
     height: state.ui.height,
+    gameModel: ownProps.gameModel,
   };
 }
 
-const config: ContainerConfig<State, StateProps> = {
+const config: ContainerConfig<State, StateProps, undefined, OwnProps> = {
   init,
   mapStateToProps,
   component: MainApp,

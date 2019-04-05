@@ -10,6 +10,14 @@ export interface GameListState {
 
 export interface FilterState {
   text: string;
+  limit?: number;
+  offset?: number;
+  orderBy?: Array<'name' | 'year' | 'score' | 'platform'>;
+  sortDesc?: boolean;
+}
+
+export interface DataState {
+  games: GameInfo[];
 }
 
 export interface State {
@@ -20,7 +28,5 @@ export interface State {
     gameList: GameListState;
     filter: FilterState;
   };
-  data: {
-    games: GameInfo[];
-  };
+  data: DataState;
 }

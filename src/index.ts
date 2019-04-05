@@ -96,7 +96,9 @@ async function run() {
   }
 
   if (appFeats.ui) {
-    appPromises.push(start());
+    appPromises.push(start({
+      gameModel,
+    }));
   }
 
   await Promise.all(appPromises);
