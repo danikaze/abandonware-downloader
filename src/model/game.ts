@@ -26,7 +26,6 @@ export class Game extends SqliteModel<Query> {
       dbPath: join(getSettings().internalDataPath, 'data.db'),
       createDbSql: [initSql],
       queries: queriesSql,
-      debug: true,
     };
 
     super(modelOptions);
@@ -242,10 +241,6 @@ export class Game extends SqliteModel<Query> {
       conditions.push(`year = ${filter.year}`);
     }
 
-    if (conditions.length === 0) {
-      return;
-    }
-
     const sortOrder = filter.sortDesc ? ' DESC' : ' ASC';
     const orderBy = filter.orderBy && filter.orderBy.length > 0
       ? ` ORDER BY ${filter.orderBy.join(', ')} ${sortOrder}`
@@ -254,7 +249,7 @@ export class Game extends SqliteModel<Query> {
     const limit = ` LIMIT ${filter.limit ? filter.limit : -1} ${filter.offset ? `OFFSET ${filter.offset}` : ''}`;
 
     return `SELECT * FROM games
-            WHERE ${conditions.join(' AND ')}
+            ${conditions.length ? `WHERE ${conditions.join(' AND ')}` : ''}
             ${orderBy}
             ${limit}
             ;`;
