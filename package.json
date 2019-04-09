@@ -41,7 +41,7 @@
   },
   "dependencies": {
     "ink": "^2.1.0",
-    "ink-color-pipe": "^0.1.0",
+    "ink-color-pipe": "^0.2.0",
     "ink-select-input": "^3.1.0",
     "ink-text-input": "^3.1.0",
     "mkdirp": "^0.5.1",

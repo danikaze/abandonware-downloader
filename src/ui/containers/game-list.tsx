@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { ColorPipe } from 'ink-color-pipe';
+import ColorPipe from 'ink-color-pipe';
 import { createContainer, ContainerConfig } from '../../utils/create-container';
 import { State } from '../store/model';
 import { FlexTable, StateProps, CellProps } from '../components/ink-flex-table';
