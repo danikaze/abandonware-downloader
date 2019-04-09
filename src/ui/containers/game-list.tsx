@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Color } from 'ink';
+import { ColorPipe } from 'ink-color-pipe';
 import { createContainer, ContainerConfig } from '../../utils/create-container';
 import { State } from '../store/model';
 import { FlexTable, StateProps, CellProps } from '../components/ink-flex-table';
@@ -15,16 +15,21 @@ function mapStateToProps(state: State): StateProps<GameListInfo> {
   const { gameList } = state.ui;
 
   function Cell({ children, row }: CellProps) {
-    if (row === gameList.selected && row === gameList.focused) {
-      return <Color yellowBright>{children}</Color>;
+    let color = 'grey';
+
+    switch (true) {
+      case row === gameList.selected && row === gameList.focused:
+        color = 'yellowBright';
+        break;
+      case row === gameList.selected:
+        color = 'yellow';
+        break;
+      case row === gameList.focused:
+        color = 'white';
+        break;
     }
-    if (row === gameList.selected) {
-      return <Color yellow>{children}</Color>;
-    }
-    if (row === gameList.focused) {
-      return <Color white>{children}</Color>;
-    }
-    return <Color gray>{children}</Color>;
+
+    return <ColorPipe styles={color}>{children}</ColorPipe>;
   }
 
   return {
