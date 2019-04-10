@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { AppTitle } from './app-title';
 import { Footer } from './footer';
+import { ViewCrawler } from './view-crawler';
 import { ViewGameList } from './view-game-list';
 import { Game } from '../../model/game';
 import { ViewTypes } from '../store/model';
@@ -20,8 +21,9 @@ export interface ViewStateProps {
   view: ViewTypes;
 }
 
-const viewComponentsMap: Partial<{ [view in ViewTypes]: React.FunctionComponent<ViewStateProps> }> = {
-  'gameList': ViewGameList,
+const viewComponentsMap: { [view in ViewTypes]: React.FunctionComponent<ViewStateProps> } = {
+  crawler: ViewCrawler,
+  gameList: ViewGameList,
 };
 
 export function MainApp(props: StateProps) {
