@@ -1,5 +1,7 @@
 import { GameInfo } from '../../../interfaces';
 
+export type ViewTypes = 'gameList' | 'crawler';
+
 export interface GameListState {
   numberShown: number;
   offset: number;
@@ -24,5 +26,6 @@ export interface State {
     height: number;
     gameList: GameListState;
     filter: FilterState;
+    view: ViewTypes;
   };
 }

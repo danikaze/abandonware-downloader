@@ -5,12 +5,14 @@ import { Footer } from './footer';
 import { GameList } from '../containers/game-list';
 import { Filter } from '../containers/filter';
 import { Game } from '../../model/game';
+import { ViewTypes } from '../store/model';
 
 export interface StateProps {
   empty: boolean;
   width: number;
   height: number;
   gameModel: Game;
+  view: ViewTypes;
 }
 
 export function MainApp(props: StateProps) {

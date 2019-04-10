@@ -56,6 +56,7 @@ function init(dispatch: DispatchType, stateProps: StateProps, state: State, ownP
 
 function mapStateToProps(state: State, ownProps: OwnProps): StateProps {
   return {
+    view: state.ui.view,
     empty: state.exit,
     width: state.ui.width,
     height: state.ui.height,
