@@ -47,7 +47,7 @@ export function MainApp(props: StateProps) {
 
       <ViewComponent {...componentProps} />
 
-      <Footer width={props.width} />
+      <Footer width={props.width} view={props.view} />
     </>
   );
 }
