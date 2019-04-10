@@ -3,6 +3,7 @@ import { State } from './model';
 export const defaultState: State = {
   exit: false,
   ui: {
+    view: 'gameList',
     width: process.stdout.columns,
     height: process.stdout.rows,
     gameList: {

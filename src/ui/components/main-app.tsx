@@ -1,24 +1,43 @@
 import * as React from 'react';
-import { Box } from 'ink';
 import { AppTitle } from './app-title';
 import { Footer } from './footer';
-import { GameList } from '../containers/game-list';
-import { Filter } from '../containers/filter';
+import { ViewCrawler } from './view-crawler';
+import { ViewGameList } from './view-game-list';
 import { Game } from '../../model/game';
+import { ViewTypes } from '../store/model';
 
 export interface StateProps {
   empty: boolean;
   width: number;
   height: number;
   gameModel: Game;
+  view: ViewTypes;
 }
+
+export interface ViewStateProps {
+  width: number;
+  height: number;
+  gameModel: Game;
+  view: ViewTypes;
+}
+
+const viewComponentsMap: { [view in ViewTypes]: React.FunctionComponent<ViewStateProps> } = {
+  crawler: ViewCrawler,
+  gameList: ViewGameList,
+};
 
 export function MainApp(props: StateProps) {
   if (props.empty) {
     return null;
   }
 
-  const APP_HEIGHT = Math.floor(props.height / 2);
+  const ViewComponent = viewComponentsMap[props.view];
+  const componentProps: ViewStateProps = {
+    width: props.width,
+    height: Math.floor(props.height / 2),
+    gameModel: props.gameModel,
+    view: props.view,
+  };
 
   return (
     <>
@@ -26,17 +45,9 @@ export function MainApp(props: StateProps) {
         abandonware-dl
       </AppTitle>
 
-      <Box flexDirection='column' width='100%'>
-        <Box margin={1}>
-          <Filter gameModel={props.gameModel} />
-        </Box>
+      <ViewComponent {...componentProps} />
 
-        <Box height={APP_HEIGHT}>
-            <GameList />
-        </Box>
-      </Box>
-
-      <Footer width={props.width} />
+      <Footer width={props.width} view={props.view} />
     </>
   );
 }
