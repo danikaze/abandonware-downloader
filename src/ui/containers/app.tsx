@@ -8,6 +8,7 @@ import { InputHandler, keyHandler } from '../store/input';
 import { gameListKeyHandler } from '../store/input/game-list';
 import { Game } from '../../model/game';
 import { updateGames } from '../store/actions/game-list';
+import { viewsKeyHandler } from '../store/input/views';
 
 export interface OwnProps {
   gameModel: Game;
@@ -38,6 +39,7 @@ function init(dispatch: DispatchType, stateProps: StateProps, state: State, ownP
     dispatch,
     [
       exitHandler,
+      viewsKeyHandler,
       gameListKeyHandler,
     ],
   ));

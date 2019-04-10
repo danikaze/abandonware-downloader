@@ -20,6 +20,15 @@ export function mainReducer(state: State, action: Action): State {
         },
       };
 
+    case 'changeView' :
+      return {
+        ...state,
+        ui: {
+          ...state.ui,
+          view: action.view,
+        },
+      };
+
     default:
       return state;
   }
