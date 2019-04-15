@@ -1,4 +1,4 @@
-import { SqliteModel, SqlModelOptions } from '../utils/sqlite-model';
+import { SqliteModel, SqliteModelOptions } from 'sqlite-model';
 import { GameInfo, FilterOptions } from '../interfaces';
 import { initSql, queriesSql } from './game-sql';
 import { getSettings } from '../utils/settings';
@@ -22,7 +22,7 @@ type Query = 'insertGame'
 
 export class Game extends SqliteModel<Query> {
   constructor() {
-    const modelOptions: SqlModelOptions<Query> = {
+    const modelOptions: SqliteModelOptions<Query> = {
       dbPath: join(getSettings().internalDataPath, 'data.db'),
       createDbSql: [initSql],
       queries: queriesSql,

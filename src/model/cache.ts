@@ -1,5 +1,4 @@
-import { SqliteModel, SqlModelOptions } from '../utils/sqlite-model';
-import { SqliteStatement } from '../utils/sqlite-model/statement';
+import { SqliteModel, SqliteModelOptions, SqliteStatement } from 'sqlite-model';
 
 export interface CacheOptions {
   /** where cached data will be stored */
@@ -9,7 +8,7 @@ export interface CacheOptions {
   /** if `false`, will leave expired cache files without removing them */
   cleanExpired?: boolean;
   /** if `true`, stored data (json) will be tabulated and sql database will be in debug mode */
-  debug?: boolean;
+  verbose?: boolean;
 }
 
 export interface PurgedData {
@@ -42,15 +41,15 @@ export class Cache extends SqliteModel<Query> {
   constructor(options: CacheOptions) {
     const opt: CacheOptions = {
       cleanExpired: true,
-      debug: false,
+      verbose: false,
       ...options,
     };
 
-    const modelOptions: SqlModelOptions<Query> = {
+    const modelOptions: SqliteModelOptions<Query> = {
       dbPath: opt.path,
       createDbSql: [Cache.initSql],
       queries: Cache.queries,
-      debug: opt.debug,
+      verbose: opt.verbose,
     };
 
     super(modelOptions);
@@ -66,7 +65,6 @@ export class Cache extends SqliteModel<Query> {
     try {
       json = JSON.stringify(data);
     } catch (error) {
-      this.logger.log('error', `cache.set(${key}, ${data}) [${error}]`);
       return;
     }
 
@@ -85,7 +83,6 @@ export class Cache extends SqliteModel<Query> {
       const res = row && JSON.parse(row.value) as T;
       return res;
     } catch (error) {
-      this.logger.log('error', `cache.get(${key}) [${error}]`);
       return;
     }
   }
@@ -96,7 +93,6 @@ export class Cache extends SqliteModel<Query> {
     try {
       await this.stmt.remove.run(key);
     } catch (error) {
-      this.logger.log('error', `cache.remove(${key}) [${error}]`);
     }
   }
 
@@ -106,7 +102,6 @@ export class Cache extends SqliteModel<Query> {
     try {
       await this.stmt.purge.run(new Date().getTime());
     } catch (error) {
-      this.logger.log('error', `cache.purge() [${error}]`);
     }
   }
 
