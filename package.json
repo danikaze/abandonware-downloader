@@ -45,7 +45,7 @@
     "ink-select-input": "^3.1.0",
     "ink-text-input": "^3.1.0",
     "mkdirp": "^0.5.1",
-    "puppeteer": "^1.12.2",
+    "puppeteer": "^1.19.0",
     "react": "^16.8.4",
     "react-redux": "^6.0.1",
     "redux": "^4.0.1",
