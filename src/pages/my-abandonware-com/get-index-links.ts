@@ -45,13 +45,14 @@ export async function getNumberOfIndexPages(browser: Browser, baseUrl: string): 
   logger.log('info', `getNumberOfIndexPages(${baseUrl})`);
 
   const page = await getBrowserNewPage(browser);
-  let nPages: number;
+  let nPages = 0;
 
   try {
     await page.goto(baseUrl);
     nPages = await page.evaluate(() => {
       const links = document.querySelectorAll('.pagination a');
-      return Number((links[links.length - 1] as HTMLAnchorElement).innerText);
+      const last = links[links.length - 1] as HTMLAnchorElement;
+      return last ? Number(last.innerText) : 0;
     });
   } catch (e) {}
 
