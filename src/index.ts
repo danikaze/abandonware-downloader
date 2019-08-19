@@ -8,8 +8,11 @@ import { Queue } from './utils/queue';
 import { GameInfo } from './interfaces';
 import { Game } from './model/game';
 import { start } from './ui';
+import { createIndexPage } from './pages/index-page';
+import { YEARS } from './pages/my-abandonware-com/constants';
 
 let stopDiscover = false;
+let endOfTheQueue = false;
 
 async function initApp(settingsFile: string) {
   const settings = loadSettings(settingsFile);
@@ -28,10 +31,14 @@ async function run() {
     }
   }
 
-  async function getFullGameInfo(site: Site, game: GameInfo, remaining: number): Promise<void> {
+  async function getFullGameInfo(resolve: () => void, site: Site, game: GameInfo, remaining: number): Promise<void> {
     console.log(` * ${game.name} (${game.year}) [${game.platform}] (${remaining} games remaining)`);
     const fullInfo = await site.getGameInfo(browser, game.pageUrl);
     await gameModel.set(fullInfo);
+
+    if (endOfTheQueue && remaining === 0) {
+      resolve();
+    }
   }
 
   async function onDiscoverCallback(info: DiscoverInfo, requestStop: () => void): Promise<void> {
@@ -62,12 +69,12 @@ async function run() {
   let browser: Browser;
 
   const appFeats = {
-    discover: false,
-    ui: true,
+    discover: true,
+    ui: false,
   };
 
   if (appFeats.discover) {
-    appPromises.push(new Promise(async () => {
+    appPromises.push(new Promise(async (resolve) => {
       site = new Site();
       browser = await launch({
         headless: !settings.debugCode,
@@ -76,22 +83,21 @@ async function run() {
 
       queue = new Queue<GameInfo>({
         threads: 5,
-        consumer: getFullGameInfo.bind(null, site),
+        consumer: getFullGameInfo.bind(null, resolve, site),
       });
 
-      site.searchIndexStrategy.setFilter({
-        name: 'ninja',
-      });
+      // site.searchIndexStrategy.setFilter({
+      //   name: 'ninja',
+      // });
 
       // tslint:disable-next-line:no-magic-numbers
       await discover({
         browser,
-        // index: createIndexPage(site.indexStrategies.Year, '1978'),
-        index: site.searchIndexStrategy,
+        index: createIndexPage(site.indexStrategies.Year, YEARS[0]),
+        // index: site.searchIndexStrategy,
         onDiscover: onDiscoverCallback,
       });
-
-      await browser.close();
+      endOfTheQueue = true;
     }));
   }
 
@@ -102,6 +108,7 @@ async function run() {
   }
 
   await Promise.all(appPromises);
+  await browser.close();
 }
 
 run();
