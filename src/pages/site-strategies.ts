@@ -92,8 +92,8 @@ export abstract class SiteStrategies {
     }
 
     await Promise.all(promises);
-    // update the cache with the local paths of the game screenshots
-    await this.cache.set(info.pageUrl, info);
+    // update the cache with the local paths of the game screenshots (in background)
+    this.cache.set(info.pageUrl, info);
   }
 
   /**
@@ -124,8 +124,8 @@ export abstract class SiteStrategies {
     });
 
     await Promise.all(promises);
-    // update the cache with local paths for the game links
-    await this.cache.set(info.pageUrl, info);
+    // update the cache with local paths for the game links (in background)
+    this.cache.set(info.pageUrl, info);
   }
 
   /**
